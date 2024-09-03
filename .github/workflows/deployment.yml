@@ -26,7 +26,7 @@ jobs:
         with:
           context: "{{defaultContext}}"
           push: true
-          tags:  ${{ secrets.DOCKER_USERNAME }}/${{secrets.project}}:latest, ${{ secrets.DOCKER_USERNAME }}/${{secrets.project}}:${{ github.run_number }}
+          tags:  ${{ secrets.DOCKER_USERNAME }}/${{secrets.PROJECT}}:latest, ${{ secrets.DOCKER_USERNAME }}/${{secrets.PROJECT}}:${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Deploy to vps
