@@ -3,6 +3,7 @@ import axios, {
   AxiosResponseHeaders,
   RawAxiosRequestHeaders,
 } from "axios";
+import { environment } from "../../environment/environment";
 
 export interface HttpResponse<T> {
   data: T;
@@ -111,11 +112,9 @@ export interface HttpRequestConfig {
 // export const api = new ApiClient(import.meta.env.VITE_API_URL as string);
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: environment.apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
 });
-
-
