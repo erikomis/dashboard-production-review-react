@@ -36,7 +36,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd api
+            cd dashboard-frontend
             docker-compose pull
             docker-compose down
             docker-compose up -d
