@@ -1,11 +1,11 @@
 import { Navigate } from "react-router-dom";
 import { useMeQuery } from "./shared/hooks/useMeQuery";
 
+
 type ProtectRouterProps = { children: React.ReactNode };
 
 export const ProtedRouter = ({ children }: ProtectRouterProps) => {
   const { data, isLoading, error } = useMeQuery();
-
   if (isLoading) {
     return (
       <div className="flex items-center w-full">
@@ -17,7 +17,6 @@ export const ProtedRouter = ({ children }: ProtectRouterProps) => {
   }
 
   if (!data?.id && !isLoading && error?.message) {
-    localStorage.clear();
     return <Navigate to="/" />;
   }
   return <>{children}</>;
