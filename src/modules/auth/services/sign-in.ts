@@ -1,5 +1,5 @@
+import { AxiosError } from "axios";
 import { api } from "../../../shared/services/api";
-
 
 type LoginProps = {
   username: string;
@@ -20,10 +20,10 @@ export const SignInService = async ({ username, password }: LoginProps) => {
       },
     });
     return response;
-  } catch (error: Error | any) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(error.request.response.data);
+  } catch (er) {
+    const error = er as AxiosError;
+    const status = error.response?.status;
+    const message = error.response?.data || error.message;
+    throw new Error(`Request failed with status ${status}: ${message}`);
   }
 };
