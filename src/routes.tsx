@@ -6,7 +6,7 @@ import { ProtedRouter } from "./ProtectRouter";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { queryClient } from "./shared/libs/react-query";
-const RouterAuth = lazy(() => import("./modules/auth/routesAuth"));
+import RouterAuth from "./modules/auth/routesAuth";
 const RouterDashboard = lazy(
   () => import("./modules/dashboard/routesDashboard")
 );
@@ -16,14 +16,7 @@ export const Rout = () => {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <Routes>
-          <Route
-            path="/*"
-            element={
-              <Suspense fallback={<Loading />}>
-                <RouterAuth />
-              </Suspense>
-            }
-          />
+          <Route path="/*" element={<RouterAuth />} />
           <Route
             path="/dashboard/*"
             element={
