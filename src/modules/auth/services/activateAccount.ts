@@ -1,22 +1,13 @@
 import { AxiosError } from "axios";
 import { api } from "../../../shared/services/api";
 
-type LoginProps = {
-  username: string;
-  password: string;
-};
-
-export const SignInService = async ({ username, password }: LoginProps) => {
+export const ActivateAccountService = async (token: string) => {
   try {
-    const response = await api.request<{
-      token: string;
-      refreshToken: string;
-    }>({
-      url: "/auth/sign-in",
-      method: "POST",
-      data: {
-        username,
-        password,
+   const response = api.request({
+      url: "/auth/activate-account",
+      method: "Get",
+      params: {
+        token,
       },
     });
     return response;
