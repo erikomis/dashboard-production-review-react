@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Loading } from "./shared/components/loading/Loading";
-import { ProtedRouter } from "./ProtectedRouter";
+import { ProtectedRouter } from "./ProtectedRouter";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { queryClient } from "./shared/libs/react-query";
@@ -21,9 +21,9 @@ export const Rout = () => {
             path="/dashboard/*"
             element={
               <Suspense fallback={<Loading />}>
-                <ProtedRouter>
+                <ProtectedRouter>
                   <RouterDashboard />
-                </ProtedRouter>
+                </ProtectedRouter>
               </Suspense>
             }
           />
