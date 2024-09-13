@@ -1,14 +1,14 @@
 import { api } from "./api";
 
+type permission = {
+  id: number;
+  name: string;
+};
+
 type role = {
   id: number;
   name: string;
-  permissions: [
-    {
-      id: number;
-      name: string;
-    }
-  ];
+  permissions: permission[];
 };
 
 type user = {
