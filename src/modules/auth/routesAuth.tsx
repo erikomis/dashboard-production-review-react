@@ -13,6 +13,10 @@ const ForgotPasswordView = lazy(
 const ActivateAccountView = lazy(
   () => import("./activate-Account/ActivateAccountPage")
 );
+
+const ResetPasswordView = lazy(
+  () => import("./reset-password/ResetPasswordPage")
+);
 const RouterAuth = () => {
   const { isSuccess } = useMeQuery();
 
@@ -52,6 +56,14 @@ const RouterAuth = () => {
           element={
             <Suspense fallback={<Loading />}>
               <ActivateAccountView />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Suspense fallback={<Loading />}>
+              <ResetPasswordView />
             </Suspense>
           }
         />
