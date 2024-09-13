@@ -4,7 +4,7 @@ import { api } from "../../../shared/services/api";
 export const ForgotPasswordService = async (email: string) => {
   try {
     const response = await api.request({
-      url: "/auth/forgot-password",
+      url: "/auth/send-recovery-code/send",
       method: "POST",
       data: {
         email,
