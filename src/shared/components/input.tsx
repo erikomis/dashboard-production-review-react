@@ -35,22 +35,21 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ sizeType, color, type, children, ...props }, ref) => {
+  ({ sizeType, color, type='text', children, ...props }, ref) => {
     const [open, setOpen] = useState(false);
-
+    
     return (
       <div className="mb-2">
         {children}
         <div className="relative">
           <input
-            placeholder="Enter your email"
+            {...props}
             className={cn(
               InputStyle({ size: sizeType, color }),
               props.className
             )}
             ref={ref}
             type={type === "password" && open ? "text" : type}
-            {...props}
           />
           {props.icon && type !== "password" && (
             <span className="absolute right-4 top-4">{props.icon}</span>
@@ -66,7 +65,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {props.error && (
-          <span className="my-2 text-xs font-bold t text-danger">{props.error}</span>
+          <span className="my-2 text-xs font-bold t text-danger">
+            {props.error}
+          </span>
         )}
       </div>
     );

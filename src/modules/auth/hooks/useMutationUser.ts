@@ -1,7 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { SignInService } from "../services/sign-in";
 
-export const useMutationUser = () =>
+type MutationSignInProps = {
+  service: typeof SignInService;
+};
+
+export const useMutationUser = ({ service }: MutationSignInProps) =>
   useMutation({
     mutationFn: ({
       username,
@@ -9,5 +13,5 @@ export const useMutationUser = () =>
     }: {
       username: string;
       password: string;
-    }) => SignInService({ username, password }),
+    }) => service({ username, password }),
   });

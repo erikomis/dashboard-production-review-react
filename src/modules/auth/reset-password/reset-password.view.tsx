@@ -1,19 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "../../../shared/components/button";
-import { Eye, Mail, User } from "lucide-react";
 import { Input } from "../../../shared/components/input";
 import { Label } from "../../../shared/components/label";
-import { SignUpViewModel } from "../modelView/SignUpViewModel";
+import { useResetPasswordModel } from "./reset-password.model";
+import { Eye, Mail } from "lucide-react";
 
-const SignUpView = () => {
-  const { errors, errosResponse, handleSubmit, onSubmit, register } =
-    SignUpViewModel();
+type ResetPasswordProps = ReturnType<typeof useResetPasswordModel>;
 
+export const ResetPasswordView = (props: ResetPasswordProps) => {
+  const { errors, handleSubmit, onSubmit, register ,errosResponse} = props;
   return (
     <div className="w-full  p-4 sm:p-12.5 xl:p-17.5">
-      <p className="block mb-1 font-medium">
-        Dashboard production review
-      </p>
+      <p className="block mb-1 font-medium">Dashboard production review</p>
       <h2 className="mb-2 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
         Sign up to your account
       </h2>
@@ -25,37 +23,28 @@ const SignUpView = () => {
       )}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Input
-          {...register("name")}
-          color="primary"
-          name="name"
-          id="name"
-          type="text"
-          placeholder="Enter your name"
-          children={<Label value="Nome:" htmlFor="name" />}
-          error={errors.username?.message}
-        />
-        <Input
-          {...register("username")}
-          color="primary"
-          name="username"
-          autoComplete="username"
-          id="username"
-          type="text"
-          placeholder="Enter your username"
-          icon={<User size={24} />}
-          children={<Label value="Username:" htmlFor="username" />}
-          error={errors.username?.message}
-        />
-        <Input
           {...register("email")}
           color="primary"
-          name="username"
+          name="email"
+          autoComplete="email"
           id="email"
-          type="text"
-          placeholder="Enter your email"
+          type="email"
+          placeholder="Entre com seu email"
           icon={<Mail size={24} />}
           children={<Label value="Email:" htmlFor="email" />}
           error={errors.email?.message}
+        />
+        <Input
+          {...register("recoveryCode")}
+          color="primary"
+          name="recoveryCode"
+          id="recoveryCode"
+          type="text"
+          autoComplete="recoveryCode"
+          placeholder="Entre com seu código de recuperação"
+          icon={<Mail size={24} />}
+          children={<Label value="Codigo de verificação:" htmlFor="Codigo de recuperação" />}
+          error={errors.recoveryCode?.message}
         />
         <Input
           {...register("password")}
@@ -70,9 +59,9 @@ const SignUpView = () => {
           error={errors.password?.message}
         />
         <Input
-          {...register("password")}
+          {...register("passwordConfirm")}
           color="primary"
-          name="password"
+          name="passwordConfirm"
           id="passwordConfirm"
           type="password"
           autoComplete="new-password"
@@ -94,19 +83,8 @@ const SignUpView = () => {
           />
         </div>
 
-        {/* <Button
-          type="button"
-          className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50"
-        >
-          <span>
-            <Google />
-          </span>
-          Sign in with Google
-        </Button> */}
-
         <div className="mt-6 text-center">
           <p>
-            Você ja tem conta ?{" "}
             <Link to="/" className="text-primary">
               Logar
             </Link>
@@ -116,5 +94,3 @@ const SignUpView = () => {
     </div>
   );
 };
-
-export default SignUpView;
