@@ -20,9 +20,9 @@ export const ForgotPasswordView = (props: ForgotPasswordProps) => {
         <Input
           {...register("email")}
           color="primary"
-          name="username"
+          name="email"
           id="email"
-          type="text"
+          type="email"
           placeholder="Entre com seu email"
           icon={<Mail size={24} />}
           children={<Label value="Email:" htmlFor="email" />}

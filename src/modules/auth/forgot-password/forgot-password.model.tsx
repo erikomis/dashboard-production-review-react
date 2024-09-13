@@ -24,7 +24,9 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
     if (response.status !== 200) {
       toast.error(response.data.message);
     }
-    navigate("/");
+    setTimeout(() => {
+      navigate("/reset-password");
+    }, 3000);
   };
 
   return {
