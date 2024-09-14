@@ -12,9 +12,8 @@ export const ForgotPasswordService = async (email: string) => {
     });
     return response;
   } catch (er) {
-    const error = er as AxiosError;
-    const status = error.response?.status;
-    const message = error.response?.data || error.message;
-    throw new Error(`Request failed with status ${status}: ${message}`);
+    const error = er as AxiosError<{ message: string }>;
+    const message = (error.response?.data?.message as string) || error.message;
+    throw new Error(`${message}`);
   }
 };

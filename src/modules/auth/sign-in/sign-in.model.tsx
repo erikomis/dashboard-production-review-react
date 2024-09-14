@@ -5,6 +5,8 @@ import { SchemaSignIn } from "./sign-in.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInValues } from "./sign-in.type";
 import { SignInService } from "../services/sign-in";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 type SignInServiceProps = typeof SignInService;
 export const useSignInModel = (SignInService: SignInServiceProps) => {
@@ -24,8 +26,9 @@ export const useSignInModel = (SignInService: SignInServiceProps) => {
       await signIN(data);
 
       navigate("/dashboard/");
-    } catch (error) {
-      console.error(error);
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      toast.error(error.message);
     }
   };
 

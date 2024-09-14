@@ -21,9 +21,8 @@ export const SignUpService = async (
 
     return response;
   } catch (er) {
-    const error = er as AxiosError;
-    const message = error.response?.data || error.message;
+    const error = er as AxiosError<{ message: string }>;
+    const message = (error.response?.data?.message as string) || error.message;
     throw new Error(`${message}`);
-    
   }
 };

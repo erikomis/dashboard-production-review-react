@@ -1,16 +1,16 @@
-import { useState } from "react";
 import { SignUpService } from "../services/sign-up";
 import { SignUp } from "./sign-up.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { SchemaSignUp } from "./sign-up.schema";
 import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
 
 type SignUpServiceProps = typeof SignUpService;
 
 export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
   const navigate = useNavigate();
-  const [errosResponse, setErrosResponse] = useState<string>("");
   const {
     register,
     handleSubmit,
@@ -31,9 +31,9 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
       if (response.status === 201) {
         navigate("/");
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error:any) {
-      setErrosResponse(error.message);
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      toast.error(error.message);
     }
   };
 
@@ -42,6 +42,5 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
     handleSubmit,
     register,
     errors,
-    errosResponse,
   };
 };
