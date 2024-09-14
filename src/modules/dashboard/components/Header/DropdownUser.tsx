@@ -4,14 +4,18 @@ import ClickOutside from "../ClickOutside";
 import { Link, useNavigate } from "react-router-dom";
 import { Settings, User } from "lucide-react";
 import { useMeQuery } from "../../../../shared/hooks/useMeQuery";
+import { logoutService } from "../../../../shared/services/logout";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { data, } = useMeQuery()
+  const { data } = useMeQuery();
   const navigate = useNavigate();
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+  
+  const handleLogout = async () => {
+    const response = await logoutService();
+    if (response) {
+      navigate("/");
+    }
   };
 
   return (
@@ -23,16 +27,17 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-          {data?.name}
+            {data?.name}
           </span>
           <span className="block text-xs">{data?.username}</span>
         </span>
 
         <span className="w-12 h-12 rounded-full">
           <img
+          className="rounded-full"
             width={112}
             height={112}
-            src={"/images/user/user-01.png"}
+            src={`https://ui-avatars.com/api/?name=${data?.name}&background=random&color=fff`}
             style={{
               width: "auto",
               height: "auto",
