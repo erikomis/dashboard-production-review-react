@@ -24,7 +24,7 @@ export const SignUpView = (props: SignUpViewProps) => {
           type="text"
           placeholder="Entre com seu nome"
           children={<Label value="Nome:" htmlFor="name" />}
-          error={errors.username?.message}
+          error={errors.name?.message}
         />
         <Input
           {...register("username")}
