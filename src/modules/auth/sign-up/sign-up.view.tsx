@@ -7,21 +7,14 @@ import { useSignUpModel } from "./sign-up.model";
 
 type SignUpViewProps = ReturnType<typeof useSignUpModel>;
 
-
 export const SignUpView = (props: SignUpViewProps) => {
-  const { errors, errosResponse, handleSubmit, onSubmit, register } = props;
+  const { errors, handleSubmit, onSubmit, register } = props;
   return (
     <div className="w-full  p-4 sm:p-12.5 xl:p-17.5">
       <p className="block mb-1 font-medium">Dashboard production review</p>
       <h2 className="mb-2 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
         Sign up to your account
       </h2>
-
-      {errosResponse && (
-        <div className="p-2 mb-1 rounded bg-danger">
-          <span className="text-slate-200"> {errosResponse}</span>
-        </div>
-      )}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Input
           {...register("name")}
