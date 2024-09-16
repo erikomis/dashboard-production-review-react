@@ -29,6 +29,7 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
       );
 
       if (response.status === 201) {
+        toast.success("User criado com sucesso!, ira redirecionar para a pagina de login e foi enviado um email de confirmação");
         navigate("/");
       }
     } catch (er) {

@@ -20,20 +20,27 @@ export const useActivateAccountModel = (
         setType("error");
         return;
       }
-
-      const response = await service(token);
-      if (response.status !== 200) {
+      try {
+        const response = await service(token);
+        if (response.status !== 200) {
+          setMessage("Erro ao ativar a conta. Por favor, tente novamente.");
+          setType("error");
+          setTimeout(() => {
+            navigate("/");
+          }, 3000);
+          return;
+        }
+        setMessage("Conta ativada com sucesso.");
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
+      } catch {
         setMessage("Erro ao ativar a conta. Por favor, tente novamente.");
         setType("error");
         setTimeout(() => {
           navigate("/");
-        }, 3000);
-        return;
+        }, 6000);
       }
-      setMessage("Conta ativada com sucesso.");
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
     };
     activateAccount();
   }, [token, navigate, service]);

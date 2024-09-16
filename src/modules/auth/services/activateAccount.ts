@@ -1,15 +1,11 @@
 import { AxiosError } from "axios";
 import { api } from "@/shared/services/api";
 
-
 export const ActivateAccountService = async (token: string) => {
   try {
-   const response = api.request({
-      url: "/auth/activate-account",
+    const response = api.request({
+      url: "/auth/activate/" + token,
       method: "Get",
-      params: {
-        token,
-      },
     });
     return response;
   } catch (er) {
