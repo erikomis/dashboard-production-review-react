@@ -1,93 +1,96 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { AxiosError } from "axios";
 import { api } from "../../../shared/services/api";
-import { ErrorResponse } from "../../../shared/types/errorResponse";
+
+type CreateCategore = {
+  name: string;
+  description: string;
+  slug: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  description: string;
+  slug: string;
+};
 
 export const CategoryService = {
   list: async () => {
     try {
-      const response = await api.request({
+      const response = await api.request<Category[]>({
         method: "GET",
         url: "/category/list",
       });
-      if (response.status !== 200 || response.data.status !== 201) {
-        throw Error(response.data.message);
-      }
       return response.data;
-    } catch (error: any) {
-      if (error) {
-        throw Error(error.response.data.message);
-      }
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      const message =
+        (error.response?.data?.message as string) || error.message;
+      throw new Error(`${message}`);
     }
   },
 
-  create: async (data: any) => {
+  create: async (data: CreateCategore) => {
     try {
       const response = await api.request({
         method: "POST",
-        url: "/category/create",
+        url: "/category/",
         data,
       });
-      if (response.status !== 200 || response.data.status !== 201) {
-        throw Error(response.data.message);
-      }
-      return response.data;
-    } catch (error: any) {
-      if (error) {
-        throw Error(error.response.data.message);
-      }
+      return response;
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      const message =
+        (error.response?.data?.message as string) || error.message;
+      throw new Error(`${message}`);
     }
   },
 
-  update: async (data: any) => {
+  update: async (data: Category) => {
     try {
       const response = await api.request({
         method: "PUT",
-        params: { id: data.id },
-        url: "/category/update",
+        url: "/category/" + data.id,
         data,
       });
-      if (response.status !== 200 || response.data.status !== 201) {
-        throw Error(response.data.message);
-      }
-      return response.data;
+      return response;
     } catch (error: any) {
       if (error) {
         throw Error(error.response.data.message);
       }
     }
   },
-  delete: async (id: string) => {
+  delete: async (id: number) => {
     try {
       const response = await api.request({
         method: "DELETE",
-        params: { id },
-        url: "/category/delete",
+        url: "/category/" + id,
       });
-      if (response.status !== 200 || response.data.status !== 201) {
-        throw Error(response.data.message);
-      }
-      return response.data;
-    } catch (error: any) {
-      if (error) {
-        throw Error(error.response.data.message);
-      }
+
+      return response;
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      const message =
+        (error.response?.data?.message as string) || error.message;
+      throw new Error(`${message}`);
     }
   },
   getById: async (id: string) => {
     try {
       const response = await api.request({
         method: "GET",
-        params: { id },
-        url: "/category/get",
+        url: "/category/" + id,
       });
       if (response.status !== 200 || response.data.status !== 201) {
         throw Error(response.data.message);
       }
       return response.data;
-    } catch (error: any) {
-      if (error as ErrorResponse) {
-        throw Error(error.response.data.message);
-      }
+    } catch (er) {
+      const error = er as AxiosError<{ message: string }>;
+      const message =
+        (error.response?.data?.message as string) || error.message;
+      throw new Error(`${message}`);
     }
   },
 };
