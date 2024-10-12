@@ -5,6 +5,7 @@ import { SchemaForgotPassword } from "./forgot-password.schema";
 import { toast } from "react-toastify";
 import { ForgotPassword } from "./forgot-password.type";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { AxiosError } from "axios";
 
 type ForgotPasswordServiceProps = typeof ForgotPasswordService;
 
@@ -19,14 +20,18 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
   });
 
   const onSubmit = async (data: ForgotPassword) => {
-    const response = await service(data.email);
-
-    if (response.status !== 200) {
-      toast.error(response.data.message);
+    try {
+      await service(data.email);
+      toast.success("Email enviado com sucesso.");
+      setTimeout(() => {
+        navigate("/reset-password");
+      }, 3000);
+    } catch (er) {
+      const message =
+        (er as AxiosError<{ message: string }>)?.response?.data?.message ||
+        (er as Error).message;
+      toast.error(message);
     }
-    setTimeout(() => {
-      navigate("/reset-password");
-    }, 3000);
   };
 
   return {
