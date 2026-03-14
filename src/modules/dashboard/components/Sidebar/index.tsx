@@ -19,10 +19,9 @@ const menuGroups = [
     name: "MENU",
     menuItems: [
       {
-        icon: <LayoutDashboard  size={18}/>,
+        icon: <LayoutDashboard size={18} />,
         label: "Dashboard",
-        route: "#",
-        children: [{ label: "eCommerce", route: "/" }],
+        route: "/dashboard/home",
       },
       {
         icon: <Package  size={18} />,
@@ -49,11 +48,11 @@ const menuGroups = [
         children: [
           {
             label: "Ver subcategorias",
-            route: "/dashboard/subcategories",
+            route: "/dashboard/sub-categories",
           },
           {
             label: "Criar subcategoria",
-            route: "/dashboard/subcategories/add",
+            route: "/dashboard/sub-categories/add",
           },
         ],
       },
@@ -62,8 +61,8 @@ const menuGroups = [
         label: "Avaliações",
         route: "#",
         children: [
-          { label: "Ver avaliações", route: "/dashboard/reviews" },
-          { label: "Criar avaliação", route: "/dashboard/reviews/add" },
+          { label: "Ver avaliações", route: "/dashboard/review" },
+          { label: "Criar avaliação", route: "/dashboard/review/add" },
         ],
       },
       {

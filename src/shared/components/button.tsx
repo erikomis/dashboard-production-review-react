@@ -23,11 +23,10 @@ const buttonVariants = tv({
       lg: "h-11 rounded-md px-8",
       icon: "h-10 w-10",
     },
-
-    defaultVariants: {
-      color: "default",
-      size: "default",
-    },
+  },
+  defaultVariants: {
+    color: "default",
+    size: "default",
   },
 });
 
@@ -49,17 +48,16 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ color, size, children, className, ...props }, ref) => {
     return (
       <button
-        className={cn( buttonVariants({ color, size }),
-          className
-        )}
+        className={cn(buttonVariants({ color, size }), className)}
         ref={ref}
         {...props}
       >
-        {props.value}
         {children}
       </button>
     );
   }
 );
+
+Button.displayName = "Button";
 
 export { Button };

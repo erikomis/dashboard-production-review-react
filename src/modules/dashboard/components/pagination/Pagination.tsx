@@ -9,33 +9,25 @@ export const Pagination = ({
   totalPages,
   onPageChange,
 }: PaginationProps) => {
-  const pages = [];
-
-  for (let i = 1; i <= totalPages; i++) {
-    pages.push(i);
-  }
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="flex items-center justify-center mt-4 space-x-1">
+    <div className="flex items-center justify-center py-4 gap-1">
       <button
-        className={`px-3 py-1 rounded-md border border-gray-300 ${
-          currentPage === 1
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-gray-200"
-        }`}
+        className="px-3 py-1.5 rounded-md border border-stroke text-sm font-medium text-black dark:text-white dark:border-strokedark disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-2 dark:hover:bg-meta-4"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        Previous
+        Anterior
       </button>
 
       {pages.map((page) => (
         <button
           key={page}
-          className={`px-3 py-1 rounded-md border border-gray-300 ${
+          className={`px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
             currentPage === page
-              ? "bg-blue-500 text-white"
-              : "hover:bg-gray-200"
+              ? "bg-primary border-primary text-white"
+              : "border-stroke text-black dark:text-white dark:border-strokedark hover:bg-gray-2 dark:hover:bg-meta-4"
           }`}
           onClick={() => onPageChange(page)}
         >
@@ -44,15 +36,11 @@ export const Pagination = ({
       ))}
 
       <button
-        className={`px-3 py-1 rounded-md border border-gray-300 ${
-          currentPage === totalPages
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-gray-200"
-        }`}
+        className="px-3 py-1.5 rounded-md border border-stroke text-sm font-medium text-black dark:text-white dark:border-strokedark disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-2 dark:hover:bg-meta-4"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        Next
+        Próximo
       </button>
     </div>
   );

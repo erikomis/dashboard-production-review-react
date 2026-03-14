@@ -1,29 +1,57 @@
-import { AxiosError } from "axios";
 import { api } from "../../../shared/services/api";
 
-type CreateSubCategorie = {
-  name: string;
-  description: string;
-  slug: string;
-  categorieId: string;
-};
+export const SubCategoryService = {
+  list: async () => {
+    const response = await api.request({
+      method: "GET",
+      url: "/sub-category/list",
+    });
+    return response.data;
+  },
 
-export const SubCategorieService = {
-  create: async (data: CreateSubCategorie) => {
-    try {
-      const response = await api.request({
-        method: "POST",
-        url: "/sub-categorie/create",
-        data,
-      });
-      if (response.status !== 200 || response.data.status !== 201) {
-        throw Error(response.data.message);
-      }
-      return response.data;
-    } catch (er) {
-      const error = er as AxiosError<{ message: string }>;
-      const message = (error.response?.data?.message as string) || error.message;
-      throw new Error(`${message}`);
-    }
+  create: async (data: {
+    name: string;
+    description?: string;
+    categoryId: string;
+  }) => {
+    const response = await api.request({
+      method: "POST",
+      url: "/sub-category/create",
+      data,
+    });
+    return response.data;
+  },
+
+  update: async (data: {
+    id: string;
+    name: string;
+    description?: string;
+    categoryId: string;
+  }) => {
+    const response = await api.request({
+      method: "PUT",
+      params: { id: data.id },
+      url: "/sub-category/update",
+      data,
+    });
+    return response.data;
+  },
+
+  delete: async (id: string) => {
+    const response = await api.request({
+      method: "DELETE",
+      params: { id },
+      url: "/sub-category/delete",
+    });
+    return response.data;
+  },
+
+  getById: async (id: string) => {
+    const response = await api.request({
+      method: "GET",
+      params: { id },
+      url: "/sub-category/get",
+    });
+    return response.data;
   },
 };

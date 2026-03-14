@@ -1,5 +1,5 @@
- const environment = {
+const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',
-}
+  apiUrl: import.meta.env.VITE_API_URL as string,
+};
 export default environment;
