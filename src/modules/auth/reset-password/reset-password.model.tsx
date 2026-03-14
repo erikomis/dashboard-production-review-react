@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SchemaResetPassword } from "./reset-password.schema";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type ResetPasswordService = typeof ResetPasswordService;
 
@@ -20,16 +21,20 @@ export const useResetPasswordModel = (service: ResetPasswordService) => {
   });
 
   const onSubmit = async ({ email, password, recoveryCode }: ResetPassword) => {
-    const response = await service(email, password, recoveryCode);
+    try {
+      const response = await service(email, password, recoveryCode);
 
-    if (response.status !== 200) {
-      setErrorsResponse(response.data.message);
+      if (response.status !== 204) {
+        setErrorsResponse(response.data.message);
+      }
+      toast.success("Senha alterada com sucesso.");
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
+    } catch (er) {
+      setErrorsResponse((er as Error).message);
     }
-    setTimeout(() => {
-      navigate("/");
-    }, 3000);
   };
-
   return {
     errosResponse,
     register,
