@@ -1,5 +1,5 @@
-import { api } from "../../../shared/services/api";
-import { Product, ProductPage } from "../../../shared/types/product";
+import { api } from "@/shared/services/api";
+import { Product, ProductPage } from "@/shared/types/product";
 
 export const ProductsService = {
   fetchProducts: async (page = 0, size = 10) => {
