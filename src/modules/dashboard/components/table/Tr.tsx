@@ -1,5 +1,5 @@
 import { HTMLAttributes, ReactNode } from "react";
-import { cn } from "../../../../shared/utils/utils";
+import { cn } from "@/shared/utils/utils";
 
 type TrProps = HTMLAttributes<HTMLTableRowElement> & {
   children: ReactNode;
