@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Button } from "../../../shared/components/button";
-import { Input } from "../../../shared/components/input";
+import { Button } from "@/shared/components/button";
+import { Input } from "@/shared/components/input";
 import { Mail } from "lucide-react";
-import { Label } from "../../../shared/components/label";
+import { Label } from "@/shared/components/label";
 import { useForgotPasswordModel } from "./forgot-password.model";
 type ForgotPasswordProps = ReturnType<typeof useForgotPasswordModel>;
 export const ForgotPasswordView = (props: ForgotPasswordProps) => {

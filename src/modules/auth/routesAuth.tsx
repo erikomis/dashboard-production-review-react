@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LayoutAuth } from "./Layout/LayoutAuth";
 import { lazy, Suspense } from "react";
-import { Loading } from "../../shared/components/loading/Loading";
-import { NotFoundView } from "../../shared/view/NotFoundView";
-import { useMeQuery } from "../../shared/hooks/useMeQuery";
+import { Loading } from "@/shared/components/loading/Loading";
+import { NotFoundView } from "@/shared/view/NotFoundView";
+import { useMeQuery } from "@/shared/hooks/useMeQuery";
 
 const LoginView = lazy(() => import("./sign-in/SignInPage"));
 const RegisterView = lazy(() => import("./sign-up/signUpPage"));

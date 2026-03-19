@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { Button } from "../../../shared/components/button";
-import { Input } from "../../../shared/components/input";
-import { Label } from "../../../shared/components/label";
+import { Button } from "@/shared/components/button";
+import { Input } from "@/shared/components/input";
+import { Label } from "@/shared/components/label";
 import { useResetPasswordModel } from "./reset-password.model";
 import { Eye, Mail } from "lucide-react";
 

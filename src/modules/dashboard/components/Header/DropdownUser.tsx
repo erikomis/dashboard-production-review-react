@@ -3,8 +3,8 @@ import { useState } from "react";
 import ClickOutside from "../ClickOutside";
 import { Link, useNavigate } from "react-router-dom";
 import { Settings, User } from "lucide-react";
-import { useMeQuery } from "../../../../shared/hooks/useMeQuery";
-import { logoutService } from "../../../../shared/services/logout";
+import { useMeQuery } from "@/shared/hooks/useMeQuery";
+import { logoutService } from "@/shared/services/logout";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

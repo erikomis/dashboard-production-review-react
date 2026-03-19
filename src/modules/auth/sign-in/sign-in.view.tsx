@@ -1,9 +1,9 @@
-import { Button } from "../../../shared/components/button";
+import { Button } from "@/shared/components/button";
 import { Link } from "react-router-dom";
 import { useSignInModel } from "./sign-in.model";
 import { Eye, Mail } from "lucide-react";
-import { Input } from "../../../shared/components/input";
-import { Label } from "../../../shared/components/label";
+import { Input } from "@/shared/components/input";
+import { Label } from "@/shared/components/label";
 
 type SignInViewProps = ReturnType<typeof useSignInModel>;
 export const SignInView = (props: SignInViewProps) => {

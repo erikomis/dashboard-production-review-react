@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ClickOutside from "../ClickOutside";
-import { environment } from "../../../../environment/environment";
+import { environment } from "@/environment/environment";
 
 interface ReviewNotification {
   id: string;

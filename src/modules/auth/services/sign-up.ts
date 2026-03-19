@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { api } from "../../../shared/services/api";
+import { api } from "@/shared/services/api";
 
 export const SignUpService = async (
   name: string,
