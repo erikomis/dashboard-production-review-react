@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { api } from "../../../shared/services/api";
+import { api } from "@/shared/services/api";
 
 type LoginProps = {
   username: string;

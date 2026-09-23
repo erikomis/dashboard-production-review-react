@@ -1,6 +1,6 @@
 const environment = {
   production: true,
-  apiUrl: 'https://api.projetos-web.com/api/v1',
-} 
+  apiUrl: import.meta.env.VITE_API_URL as string,
+};
 
 export default environment;

@@ -1,20 +1,38 @@
-
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import DarkModeSwitcher from "./DarkModeSwitcher";
-import DropdownMessage from "./DropdownMessage";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
-
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = search.trim().toLowerCase();
+    if (!q) return;
+
+    if (q.includes("produto")) return navigate("/dashboard/products");
+    if (q.includes("categor")) return navigate("/dashboard/categories");
+    if (q.includes("subcategor") || q.includes("sub-categor"))
+      return navigate("/dashboard/sub-categories");
+    if (q.includes("avali") || q.includes("review"))
+      return navigate("/dashboard/review");
+    if (q.includes("perfil") || q.includes("profile"))
+      return navigate("/dashboard/profile");
+    if (q.includes("config") || q.includes("setting"))
+      return navigate("/dashboard/settings");
+  };
+
   return (
     <header className="sticky top-0 flex w-full bg-white z-999 drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
       <div className="flex items-center justify-between flex-grow px-4 py-4 shadow-2 md:px-6 2xl:px-11">
         <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-          {/* <!-- Hamburger Toggle BTN --> */}
+          {/* Hamburger Toggle */}
           <button
             aria-controls="sidebar"
             onClick={(e) => {
@@ -55,7 +73,6 @@ const Header = (props: {
               </span>
             </span>
           </button>
-          {/* <!-- Hamburger Toggle BTN --> */}
 
           <Link className="flex-shrink-0 block lg:hidden" to="/">
             <img
@@ -67,10 +84,11 @@ const Header = (props: {
           </Link>
         </div>
 
+        {/* Search */}
         <div className="hidden sm:block">
-          <form action="https://formbold.com/s/unique_form_id" method="POST">
+          <form onSubmit={handleSearch}>
             <div className="relative">
-              <button className="absolute left-0 -translate-y-1/2 top-1/2">
+              <button type="submit" className="absolute left-0 -translate-y-1/2 top-1/2">
                 <svg
                   className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
                   width="20"
@@ -93,10 +111,11 @@ const Header = (props: {
                   />
                 </svg>
               </button>
-
               <input
                 type="text"
-                placeholder="Type to search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Pesquisar no menu..."
                 className="w-full pr-4 font-medium bg-transparent pl-9 focus:outline-none xl:w-125"
               />
             </div>
@@ -105,22 +124,10 @@ const Header = (props: {
 
         <div className="flex items-center gap-3 2xsm:gap-7">
           <ul className="flex items-center gap-2 2xsm:gap-4">
-            {/* <!-- Dark Mode Toggler --> */}
             <DarkModeSwitcher />
-            {/* <!-- Dark Mode Toggler --> */}
-
-            {/* <!-- Notification Menu Area --> */}
             <DropdownNotification />
-            {/* <!-- Notification Menu Area --> */}
-
-            {/* <!-- Chat Notification Area --> */}
-            <DropdownMessage />
-            {/* <!-- Chat Notification Area --> */}
           </ul>
-
-          {/* <!-- User Area --> */}
           <DropdownUser />
-          {/* <!-- User Area --> */}
         </div>
       </div>
     </header>

@@ -1,5 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
-import { Logo } from "../../../shared/components/svgs/Logo";
+import { Logo } from "@/shared/components/svgs/Logo";
 
 export const LayoutAuth = () => {
   return (

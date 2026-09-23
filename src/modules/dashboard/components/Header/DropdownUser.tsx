@@ -3,8 +3,8 @@ import { useState } from "react";
 import ClickOutside from "../ClickOutside";
 import { Link, useNavigate } from "react-router-dom";
 import { Settings, User } from "lucide-react";
-import { useMeQuery } from "../../../../shared/hooks/useMeQuery";
-import { logoutService } from "../../../../shared/services/logout";
+import { useMeQuery } from "@/shared/hooks/useMeQuery";
+import { logoutService } from "@/shared/services/logout";
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -71,7 +71,7 @@ const DropdownUser = () => {
           <ul className="flex flex-col gap-5 border-b border-stroke px-6 py-7.5 dark:border-strokedark">
             <li>
               <Link
-                to="/profile"
+                to="/dashboard/profile"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 {/* <svg
@@ -118,7 +118,7 @@ const DropdownUser = () => {
             </li>
             <li>
               <Link
-                to="/settings"
+                to="/dashboard/settings"
                 className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base"
               >
                 {/* <svg

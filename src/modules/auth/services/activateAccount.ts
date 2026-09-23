@@ -3,7 +3,7 @@ import { api } from "@/shared/services/api";
 
 export const ActivateAccountService = async (token: string) => {
   try {
-    const response = api.request({
+    const response = await api.request({
       url: "/auth/activate/" + token,
       method: "Get",
     });

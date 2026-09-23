@@ -1,8 +1,8 @@
 import { Eye, Mail, User } from "lucide-react";
-import { Input } from "../../../shared/components/input";
-import { Button } from "../../../shared/components/button";
+import { Input } from "@/shared/components/input";
+import { Button } from "@/shared/components/button";
 import { Link } from "react-router-dom";
-import { Label } from "../../../shared/components/label";
+import { Label } from "@/shared/components/label";
 import { useSignUpModel } from "./sign-up.model";
 
 type SignUpViewProps = ReturnType<typeof useSignUpModel>;
