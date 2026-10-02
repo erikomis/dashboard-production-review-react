@@ -7,11 +7,13 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { queryClient } from "./shared/libs/react-query";
 import RouterAuth from "./modules/auth/routesAuth";
+import useColorMode from "./shared/hooks/useColorMode";
 const RouterDashboard = lazy(
   () => import("./modules/dashboard/routesDashboard")
 );
 
 export const Rout = () => {
+  const [colorMode] = useColorMode();
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
@@ -20,7 +22,7 @@ export const Rout = () => {
           <Route
             path="/dashboard/*"
             element={
-              <Suspense fallback={<Loading />}>
+              <Suspense fallback={<Loading label="Carregando painel..." />}>
                 <ProtectedRouter>
                   <RouterDashboard />
                 </ProtectedRouter>
@@ -38,7 +40,7 @@ export const Rout = () => {
           pauseOnFocusLoss
           draggable
           pauseOnHover
-          theme="light"
+          theme={colorMode}
         />
       </QueryClientProvider>
     </BrowserRouter>
