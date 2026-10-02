@@ -6,7 +6,7 @@ type TableProps = {
 
 export const Table = ({ children, caption, ...rest }: TableProps) => {
   return (
-    <div className="max-w-full overflow-x-auto">
+    <div className="relative max-w-full overflow-x-auto">
       <table className="w-full table-auto text-left text-sm" {...rest}>
         {caption && <caption className="sr-only">{caption}</caption>}
         {children}
