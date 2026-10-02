@@ -117,13 +117,6 @@ echo "VITE_API_URL=http://localhost:8084/api/v1" > .env.local
 npm run dev
 ```
 
-> [!TIP]
-> Todo cadastro novo recebe o perfil `USER`. Depois que existir um administrador, os demais são promovidos pela tela **Usuários**. Para criar o primeiro, associe-o ao perfil `ADMIN` no banco:
-> ```sql
-> INSERT INTO users_roles (user_id, role_id)
-> SELECT u.id, r.id FROM user u, role r WHERE u.username = 'seu-usuario' AND r.name = 'ADMIN';
-> ```
-
 ### Scripts
 
 | Comando | O que faz |
