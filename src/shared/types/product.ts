@@ -53,3 +53,12 @@ export interface ProductPayload {
 export type ProductSortProperty = "name" | "createdAt" | "averageNote" | "totalReviews";
 
 export type ProductPage = Page<ProductSummary>;
+
+/** Item do autocompletar (`GET /production/suggest`). */
+export interface ProductSuggestion {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  categoryName: string | null;
+}

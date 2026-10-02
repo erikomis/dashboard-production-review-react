@@ -1,27 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Menu, Search } from "lucide-react";
+import { useCommandPalette } from "@/modules/dashboard/components/command-palette";
+import { shortcutLabel } from "@/modules/dashboard/components/command-palette/command-items";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 
-const Header = (props: {
-  sidebarOpen: boolean;
-  setSidebarOpen: (arg0: boolean) => void;
-}) => {
-  const [search, setSearch] = useState("");
-  const navigate = useNavigate();
-
-  // Busca global de produtos (a API suporta `search` parcial no nome)
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = search.trim();
-    navigate(q ? `/dashboard/products?search=${encodeURIComponent(q)}` : "/dashboard/products");
-    setSearch("");
-  };
+const Header = (props: { sidebarOpen: boolean; setSidebarOpen: (arg0: boolean) => void }) => {
+  const palette = useCommandPalette();
+  const shortcut = shortcutLabel();
 
   return (
-    <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+    <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85 dark:border-strokedark dark:bg-boxdark/95 dark:supports-[backdrop-filter]:bg-boxdark/85">
       <div className="flex flex-grow items-center justify-between gap-3 px-4 py-3 md:px-6 2xl:px-11">
         <div className="flex items-center gap-3 lg:hidden">
           <button
@@ -39,26 +28,26 @@ const Header = (props: {
           </button>
         </div>
 
-        <form role="search" onSubmit={handleSearch} className="hidden flex-1 sm:block">
-          <label htmlFor="global-search" className="sr-only">
-            Buscar produtos
-          </label>
-          <div className="relative max-w-md">
-            <Search
-              size={18}
+        {/* Busca rápida: telas, ações e produtos (Ctrl+K / ⌘+K) */}
+        <div className="flex flex-1 justify-end sm:justify-start">
+          <button
+            type="button"
+            onClick={palette.open}
+            aria-haspopup="dialog"
+            aria-keyshortcuts="Control+K Meta+K"
+            aria-label={`Busca rápida (${shortcut})`}
+            className="group flex h-10 items-center gap-3 rounded-lg border border-stroke bg-gray-2 px-3 text-sm text-body transition-colors hover:border-primary/50 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-strokedark dark:bg-meta-4 dark:text-bodydark dark:hover:text-white sm:w-full sm:max-w-md"
+          >
+            <Search size={18} aria-hidden="true" className="shrink-0" />
+            <span className="hidden flex-1 text-left sm:inline">Buscar telas, ações ou produtos...</span>
+            <kbd
               aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-body dark:text-bodydark"
-            />
-            <input
-              id="global-search"
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar produtos pelo nome..."
-              className="h-10 w-full rounded-lg border border-transparent bg-gray-2 pl-10 pr-4 text-sm text-black outline-none placeholder:text-body/80 focus:border-primary dark:bg-meta-4 dark:text-white dark:placeholder:text-bodydark/70"
-            />
-          </div>
-        </form>
+              className="hidden rounded border border-stroke bg-white px-1.5 py-0.5 font-satoshi text-[11px] font-medium text-black shadow-sm dark:border-strokedark dark:bg-boxdark dark:text-bodydark1 sm:inline"
+            >
+              {shortcut}
+            </kbd>
+          </button>
+        </div>
 
         <div className="flex items-center gap-3 2xsm:gap-5">
           <ul className="flex items-center gap-3 2xsm:gap-4">
