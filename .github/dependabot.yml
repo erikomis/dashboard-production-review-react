@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Dependências do npm: uma PR semanal agrupada (produção e desenvolvimento separadas)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      producao:
+        dependency-type: production
+        update-types: ["minor", "patch"]
+      desenvolvimento:
+        dependency-type: development
+        update-types: ["minor", "patch"]
+
+  # Actions do GitHub: uma PR mensal agrupada
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
