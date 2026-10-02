@@ -19,7 +19,17 @@ export type EventIcon =
   | "eye-off"
   | "eye"
   | "download"
-  | "activity";
+  | "activity"
+  | "flag"
+  | "flag-off"
+  | "reply"
+  | "reply-off"
+  | "image-plus"
+  | "image-minus"
+  | "bell-plus"
+  | "bell-minus"
+  | "merge"
+  | "layers";
 
 export type EventMeta = { label: string; icon: EventIcon; tone: EventTone };
 
@@ -45,9 +55,19 @@ const EVENT_META: Record<string, EventMeta> = {
   REVIEW_DELETED: { label: "Avaliação excluída", icon: "message", tone: "danger" },
   REVIEW_HIDDEN: { label: "Avaliação ocultada", icon: "eye-off", tone: "warning" },
   REVIEW_RESTORED: { label: "Avaliação restaurada", icon: "eye", tone: "success" },
+  REVIEW_REPORTED: { label: "Avaliação denunciada", icon: "flag", tone: "danger" },
+  REVIEW_REPORTS_DISMISSED: { label: "Denúncias descartadas", icon: "flag-off", tone: "neutral" },
+  REVIEW_REPLIED: { label: "Resposta oficial", icon: "reply", tone: "primary" },
+  REVIEW_REPLY_DELETED: { label: "Resposta removida", icon: "reply-off", tone: "danger" },
+  REVIEW_IMAGE_ADDED: { label: "Foto na avaliação", icon: "image-plus", tone: "success" },
+  REVIEW_IMAGE_REMOVED: { label: "Foto removida", icon: "image-minus", tone: "danger" },
+  REVIEWS_BULK_MODERATED: { label: "Moderação em lote", icon: "layers", tone: "warning" },
+  PRODUCT_FOLLOWED: { label: "Produto seguido", icon: "bell-plus", tone: "info" },
+  PRODUCT_UNFOLLOWED: { label: "Deixou de seguir", icon: "bell-minus", tone: "neutral" },
   CATALOG_IMPORT_STARTED: { label: "Importação iniciada", icon: "download", tone: "info" },
   CATALOG_IMPORT_COMPLETED: { label: "Importação concluída", icon: "download", tone: "success" },
   CATALOG_IMPORT_FAILED: { label: "Importação falhou", icon: "download", tone: "danger" },
+  CATALOG_DEDUPLICATED: { label: "Duplicados removidos", icon: "merge", tone: "info" },
   LEGACY: { label: "Evento legado", icon: "activity", tone: "neutral" },
 };
 
@@ -91,8 +111,8 @@ export const EVENT_TYPE_GROUPS: { label: string; types: string[] }[] = [
     label: "Catálogo",
     types: EVENT_TYPES.filter((t) => /^(CATEGORY|SUBCATEGORY|PRODUCT)_/.test(t)),
   },
-  { label: "Avaliações", types: EVENT_TYPES.filter((t) => t.startsWith("REVIEW_")) },
-  { label: "Importação", types: EVENT_TYPES.filter((t) => t.startsWith("CATALOG_IMPORT_")) },
+  { label: "Avaliações", types: EVENT_TYPES.filter((t) => t.startsWith("REVIEW_") || t === "REVIEWS_BULK_MODERATED") },
+  { label: "Importação e catálogo", types: EVENT_TYPES.filter((t) => t.startsWith("CATALOG_")) },
   { label: "Outros", types: ["LEGACY"] },
 ];
 
@@ -106,7 +126,9 @@ export const getEntityLink = (
   type?: string | null
 ): string | null => {
   if (type?.endsWith("_DELETED")) return null;
-  if (entityType === "IMPORT") return "/dashboard/import";
+  if (entityType === "IMPORT" || type === "CATALOG_DEDUPLICATED") return "/dashboard/import";
+  if (type === "REVIEWS_BULK_MODERATED") return "/dashboard/review";
+  if (type === "REVIEW_REPORTED" && entityId && /^\d+$/.test(entityId)) return "/dashboard/review?status=REPORTED";
   if (!entityId || !/^\d+$/.test(entityId)) return null;
   switch (entityType) {
     case "PRODUCT":

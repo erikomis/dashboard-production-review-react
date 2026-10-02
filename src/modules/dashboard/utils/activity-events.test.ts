@@ -28,6 +28,10 @@ describe("activity-events", () => {
       "PRODUCT_CREATED", "PRODUCT_UPDATED", "PRODUCT_DELETED", "PRODUCT_IMAGE_ADDED", "PRODUCT_IMAGE_REMOVED",
       "REVIEW_CREATED", "REVIEW_UPDATED", "REVIEW_DELETED", "REVIEW_HIDDEN", "REVIEW_RESTORED",
       "CATALOG_IMPORT_STARTED", "CATALOG_IMPORT_COMPLETED", "CATALOG_IMPORT_FAILED",
+      // fase 3
+      "REVIEW_REPORTED", "REVIEW_REPORTS_DISMISSED", "REVIEW_REPLIED", "REVIEW_REPLY_DELETED",
+      "REVIEW_IMAGE_ADDED", "REVIEW_IMAGE_REMOVED", "PRODUCT_FOLLOWED", "PRODUCT_UNFOLLOWED",
+      "CATALOG_DEDUPLICATED", "REVIEWS_BULK_MODERATED",
     ];
     for (const type of contract) {
       expect(EVENT_TYPES).toContain(type);
@@ -52,5 +56,15 @@ describe("activity-events", () => {
     expect(getEntityLink("USER", "2")).toBeNull();
     expect(getEntityLink("PRODUCT", "abc")).toBeNull();
     expect(getEntityLink("PRODUCT", null)).toBeNull();
+  });
+
+  it("eventos da fase 3 têm rótulo, cor e destino próprios", () => {
+    expect(getEventMeta("REVIEW_REPORTED")).toEqual({ label: "Avaliação denunciada", icon: "flag", tone: "danger" });
+    expect(getEventMeta("REVIEW_REPLIED").icon).toBe("reply");
+    expect(getEventMeta("CATALOG_DEDUPLICATED").icon).toBe("merge");
+    expect(getEntityLink("PRODUCT", null, "CATALOG_DEDUPLICATED")).toBe("/dashboard/import");
+    expect(getEntityLink("REVIEW", null, "REVIEWS_BULK_MODERATED")).toBe("/dashboard/review");
+    expect(getEntityLink("REVIEW", "4", "REVIEW_REPORTED")).toBe("/dashboard/review?status=REPORTED");
+    expect(getEntityLink("REVIEW", "4", "REVIEW_REPLIED")).toBe("/dashboard/review/4");
   });
 });

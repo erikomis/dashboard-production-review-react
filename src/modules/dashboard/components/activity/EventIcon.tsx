@@ -1,5 +1,15 @@
 import {
   Activity,
+  BellMinus,
+  BellPlus,
+  Flag,
+  FlagOff,
+  ImageMinus,
+  ImagePlus,
+  Layers,
+  Merge,
+  MessageSquareReply,
+  MessageSquareX,
   Download,
   Eye,
   EyeOff,
@@ -32,6 +42,16 @@ const ICONS: Record<EventIconName, React.ComponentType<{ size?: number; "aria-hi
   eye: Eye,
   download: Download,
   activity: Activity,
+  flag: Flag,
+  "flag-off": FlagOff,
+  reply: MessageSquareReply,
+  "reply-off": MessageSquareX,
+  "image-plus": ImagePlus,
+  "image-minus": ImageMinus,
+  "bell-plus": BellPlus,
+  "bell-minus": BellMinus,
+  merge: Merge,
+  layers: Layers,
 };
 
 const TONE_CLASSES: Record<EventTone, string> = {
