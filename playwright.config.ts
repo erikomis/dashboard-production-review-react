@@ -1,80 +1,50 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * E2E do painel.
+ * - Padrão: API mockada com `page.route` (fixtures em `test/e2e/fixtures`), roda em qualquer lugar.
+ * - `E2E_REAL_API=1`: contra a API real (`VITE_API_URL`), reaproveitando a sessão do global-setup;
+ *   os testes que alteram dados são pulados.
+ * Localmente usa o Chrome instalado (`channel: "chrome"`) e o `npm run dev`; no CI, o Chromium do
+ * Playwright e o build de produção servido pelo `vite preview` (rode `npm run build` antes).
  */
-// import dotenv from 'dotenv';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+const isCI = !!process.env.CI;
+const isRealApi = !!process.env.E2E_REAL_API;
+const PORT = Number(process.env.E2E_PORT ?? 5173);
+const baseURL = `http://localhost:${PORT}`;
+const channel = process.env.E2E_CHANNEL ?? (isCI ? undefined : "chrome");
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
-  testDir: './test',
+  testDir: "./test/e2e",
   testMatch: /.*\.e2e-spec\.ts$/,
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  fullyParallel: !isRealApi,
+  forbidOnly: isCI,
+  retries: isCI ? 1 : 0,
+  // contra a API real, um teste por vez (rate limit e dados compartilhados)
+  workers: isRealApi ? 1 : isCI ? 2 : undefined,
+  timeout: 30_000,
+  expect: { timeout: 7_000 },
+  reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["list"], ["html", { open: "never" }]],
+  globalSetup: isRealApi ? "./test/e2e/support/global-setup.ts" : undefined,
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-     //baseURL: 'http://127.0.0.1:5173',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    baseURL,
+    locale: "pt-BR",
+    timezoneId: "America/Sao_Paulo",
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
   },
-  // webServer: {
-  //   command: 'npm run start',
-  //   port: 5173,
-  //   reuseExistingServer: !process.env.CI,
-  // },
-  /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], ...(channel ? { channel } : {}) },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: isCI ? `npx vite preview --port ${PORT} --strictPort` : `npm run dev -- --port ${PORT} --strictPort`,
+    url: baseURL,
+    // localmente reaproveita o `npm run dev` que já estiver rodando
+    reuseExistingServer: !isCI,
+    timeout: 120_000,
+    env: { VITE_API_URL: process.env.VITE_API_URL ?? "http://localhost:8084/api/v1" },
+  },
 });
