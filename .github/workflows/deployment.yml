@@ -15,14 +15,14 @@ jobs:
   publish:
     name: Publicar imagem no GHCR
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # builda exatamente o commit que foi testado
           ref: ${{ github.event.workflow_run.head_sha }}
@@ -40,10 +40,10 @@ jobs:
           exit 1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login no GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -52,7 +52,7 @@ jobs:
       # labels OCI (inclui org.opencontainers.image.source, que liga o pacote a este repositório)
       - name: Metadados da imagem
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE }}
           tags: |
@@ -60,7 +60,7 @@ jobs:
             type=raw,value=${{ steps.tag.outputs.tag }}
 
       - name: Build e push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -75,14 +75,14 @@ jobs:
   deploy:
     name: Deploy na VPS
     needs: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       # o token do job é usado só para a VPS puxar a imagem privada durante o deploy
       packages: read
     steps:
       - name: Atualizar containers na VPS
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         env:
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
