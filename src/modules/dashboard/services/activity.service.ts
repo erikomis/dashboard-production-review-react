@@ -1,4 +1,5 @@
 import { api } from "@/shared/services/api";
+import { fetchCsv } from "@/shared/services/csv-export";
 import { ActivityFilters, ActivityPage, ActivitySummary } from "@/shared/types/admin";
 
 const clean = (filters: ActivityFilters) => ({
@@ -28,4 +29,7 @@ export const ActivityService = {
     });
     return response.data;
   },
+
+  /** GET /admin/activity/export.csv — filtros da atividade (até 10.000 linhas). */
+  exportCsv: (filters: ActivityFilters) => fetchCsv("/admin/activity/export.csv", clean(filters), "atividade"),
 };

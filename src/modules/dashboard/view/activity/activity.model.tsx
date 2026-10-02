@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQueryActivity, useQueryActivitySummary } from "@/modules/dashboard/hooks/useActivity";
+import { useCsvExport } from "@/modules/dashboard/hooks/useCsvExport";
+import { ActivityService } from "@/modules/dashboard/services/activity.service";
 import {
   ENTITY_TYPES,
   EVENT_TYPE_GROUPS,
@@ -93,6 +95,8 @@ export const useActivityModel = () => {
   const list = useQueryActivity({ ...filters, page, size: ACTIVITY_PAGE_SIZE });
   const summary = useQueryActivitySummary(filters.from, filters.to);
 
+  const csv = useCsvExport(() => ActivityService.exportCsv(filters), "eventos");
+
   const error = list.error ?? summary.error;
   const isUnavailable = getErrorStatus(list.error) === 503 || getErrorStatus(summary.error) === 503;
 
@@ -163,6 +167,8 @@ export const useActivityModel = () => {
     isError: list.isError || summary.isError,
     isUnavailable,
     errorMessage: error ? getErrorMessage(error, "Não foi possível carregar a atividade.") : undefined,
+    exportCsv: csv.exportCsv,
+    isExporting: csv.isExporting,
     retry: () => {
       void list.refetch();
       void summary.refetch();

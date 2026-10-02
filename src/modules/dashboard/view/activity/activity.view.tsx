@@ -8,6 +8,7 @@ import { FilterInput, FilterSelect } from "@/modules/dashboard/components/form/F
 import { ChartCard } from "@/modules/dashboard/components/chart/ChartCard";
 import { DailyBarChart } from "@/modules/dashboard/components/chart/DailyCharts";
 import { EventIcon } from "@/modules/dashboard/components/activity/EventIcon";
+import { ExportCsvButton } from "@/modules/dashboard/components/export/ExportCsvButton";
 import { formatDayLong } from "@/modules/dashboard/utils/chart-data";
 import { formatRelativeTime } from "@/modules/dashboard/utils/relative-time";
 import { EmptyState } from "@/shared/components/feedback/EmptyState";
@@ -58,6 +59,8 @@ export const ActivityView = ({
   isError,
   isUnavailable,
   errorMessage,
+  exportCsv,
+  isExporting,
   retry,
 }: ActivityViewProps) => {
   const periodText = `de ${formatDayLong(periodDraft.from)} a ${formatDayLong(periodDraft.to)}`;
@@ -68,6 +71,13 @@ export const ActivityView = ({
         title="Atividade"
         description="Trilha de auditoria: tudo o que acontece no catálogo, nas avaliações e nas contas, em ordem cronológica."
         breadcrumbs={[{ label: "Sistema" }, { label: "Atividade" }]}
+        actions={
+          <ExportCsvButton
+            onExport={exportCsv}
+            isExporting={isExporting}
+            description="Baixa os eventos com os filtros e o período atuais (até 10.000 linhas)"
+          />
+        }
       />
 
       {/* Filtros: uma linha acima de tudo o que eles afetam (resumo e lista) */}
