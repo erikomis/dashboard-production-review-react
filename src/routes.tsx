@@ -30,8 +30,10 @@ export const Rout = () => {
             }
           />
         </Routes>
+        {/* no topo, abaixo do header: no rodapé os avisos cobriam a barra de ações em lote */}
         <ToastContainer
-          position="bottom-right"
+          position="top-right"
+          style={{ top: "4.75rem" }}
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}

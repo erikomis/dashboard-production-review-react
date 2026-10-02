@@ -15,3 +15,7 @@ const applyColorMode = (mode: ColorMode) => {
 // Aplica o tema salvo assim que o módulo carrega (evita "flash" no login)
 applyColorMode(colorModeStore.get());
 colorModeStore.subscribe(() => applyColorMode(colorModeStore.get()));
+
+export type TableDensity = "comfortable" | "compact";
+/** Densidade das tabelas (linhas confortáveis ou compactas), compartilhada entre as telas. */
+export const tableDensityStore = createLocalStore<TableDensity>("table-density", "comfortable");

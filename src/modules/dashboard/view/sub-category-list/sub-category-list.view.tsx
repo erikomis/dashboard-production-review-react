@@ -89,7 +89,7 @@ export const SubCategoryListView = ({
           </div>
         </div>
 
-        <Table.Root caption="Lista de subcategorias" aria-busy={isLoading || undefined}>
+        <Table.Root stickyHeader caption="Lista de subcategorias" aria-busy={isLoading || undefined}>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Subcategoria</Table.Th>

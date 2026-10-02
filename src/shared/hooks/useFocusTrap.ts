@@ -3,6 +3,9 @@ import { RefObject, useEffect, useRef } from "react";
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+/** Pilha de armadilhas ativas: só a do topo (o diálogo aberto por último) reage ao teclado. */
+const trapStack: symbol[] = [];
+
 /**
  * Prende o foco (Tab / Shift+Tab) dentro de `ref` enquanto `active`,
  * fecha com Esc e devolve o foco ao elemento que abriu.
@@ -25,6 +28,9 @@ export const useFocusTrap = (
     if (!container) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    const token = Symbol("focus-trap");
+    trapStack.push(token);
+    const isTop = () => trapStack[trapStack.length - 1] === token;
     const focusables = () =>
       Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
         (el) => el.offsetParent !== null || el === document.activeElement
@@ -35,6 +41,8 @@ export const useFocusTrap = (
     initial.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Diálogo empilhado (ex.: confirmação aberta de dentro de um painel): só o de cima responde
+      if (!isTop()) return;
       if (event.key === "Escape") {
         event.stopPropagation();
         onEscapeRef.current?.();
@@ -60,6 +68,8 @@ export const useFocusTrap = (
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      const index = trapStack.indexOf(token);
+      if (index >= 0) trapStack.splice(index, 1);
       previouslyFocused?.focus?.();
     };
   }, [ref, active]);

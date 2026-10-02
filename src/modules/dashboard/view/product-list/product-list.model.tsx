@@ -10,6 +10,7 @@ import {
   PRODUCT_SORT_OPTIONS,
 } from "@/modules/dashboard/utils/product-sort";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
+import { useTableDensityPreference } from "@/modules/dashboard/hooks/useTableDensityPreference";
 import { productListFiltersSchema } from "./product-list.schema";
 import { ProductListFilters } from "./product-list.type";
 
@@ -155,7 +156,11 @@ export const useProductListModel = () => {
     }
   }, [page, totalPagesFromApi, setSearchParams]);
 
+  const [density, setDensity] = useTableDensityPreference();
+
   return {
+    density,
+    setDensity,
     products: data?.content ?? [],
     page,
     setPage,

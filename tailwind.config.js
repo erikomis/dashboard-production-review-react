@@ -314,6 +314,27 @@ export default {
           "0%, 100%": { transform: "translateY(100%)" },
           "50%": { transform: "translateY(0)" },
         },
+        // Transições discretas da fase 3 (o CSS global zera tudo com prefers-reduced-motion)
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.97) translateY(-4px)" },
+          to: { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(16px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         linspin: "linspin 1568.2353ms linear infinite",
@@ -332,6 +353,12 @@ export default {
         line1: "line 10s infinite linear",
         line2: "line-revert 8s infinite linear",
         line3: "line 7s infinite linear",
+        "fade-in": "fade-in 150ms ease-out both",
+        // `backwards`: sem transform depois da animação (um transform vira o containing block de `position: fixed`)
+        "fade-up": "fade-up 220ms cubic-bezier(0.2, 0, 0, 1) backwards",
+        "scale-in": "scale-in 160ms cubic-bezier(0.2, 0, 0, 1) both",
+        "slide-in-right": "slide-in-right 240ms cubic-bezier(0.2, 0, 0, 1) both",
+        "slide-up": "slide-up 200ms cubic-bezier(0.2, 0, 0, 1) both",
       },
     },
   },
