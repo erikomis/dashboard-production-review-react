@@ -1,3 +1,5 @@
+import { apiTime, parseApiDate } from "@/shared/utils/date";
+
 const rtf = new Intl.RelativeTimeFormat("pt-BR", { numeric: "auto" });
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -12,7 +14,7 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 /** "há 5 minutos", "ontem", "agora mesmo". */
 export const formatRelativeTime = (value?: string | null, now: number = Date.now()) => {
   if (!value) return "—";
-  const time = new Date(value).getTime();
+  const time = apiTime(value);
   if (Number.isNaN(time)) return "—";
   const diffSeconds = Math.round((time - now) / 1000);
   const abs = Math.abs(diffSeconds);
@@ -40,8 +42,8 @@ const dayHeading = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "num
 
 /** Rótulo do agrupamento por dia: "Hoje", "Ontem" ou "quinta-feira, 1 de outubro". */
 export const dayGroupLabel = (value: string, now: Date = new Date()) => {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Sem data";
+  const date = parseApiDate(value);
+  if (!date) return "Sem data";
   const key = toDateInput(date);
   if (key === toDateInput(now)) return "Hoje";
   const yesterday = new Date(now);
@@ -55,8 +57,8 @@ export const groupByDay = <T,>(items: T[], getDate: (item: T) => string, now: Da
   const groups: { key: string; label: string; items: T[] }[] = [];
   for (const item of items) {
     const raw = getDate(item);
-    const parsed = new Date(raw);
-    const key = Number.isNaN(parsed.getTime()) ? "invalid" : toDateInput(parsed);
+    const parsed = parseApiDate(raw);
+    const key = parsed ? toDateInput(parsed) : "invalid";
     const last = groups[groups.length - 1];
     if (last && last.key === key) last.items.push(item);
     else groups.push({ key, label: dayGroupLabel(raw, now), items: [item] });

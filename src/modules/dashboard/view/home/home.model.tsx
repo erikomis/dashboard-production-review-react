@@ -1,6 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { useQueryAdminStats } from "@/modules/dashboard/hooks/useQueryAdminStats";
 import { useQueryReviews } from "@/modules/dashboard/hooks/useQueryReviews";
+import { useQueryAdminReviews } from "@/modules/dashboard/hooks/useAdminReviews";
 import {
   chartTheme,
   PERIOD_OPTIONS,
@@ -15,6 +16,7 @@ import { homePeriodSchema } from "./home.schema";
 import { HomePeriod } from "./home.type";
 
 const RECENT_COUNT = 5;
+const PENDING_COUNT = 4;
 
 export const useHomeModel = () => {
   const { data: user } = useMeQuery();
@@ -35,6 +37,9 @@ export const useHomeModel = () => {
 
   const stats = useQueryAdminStats(days);
   const reviews = useQueryReviews(0, RECENT_COUNT);
+  // Pendências: denúncias abertas e o que foi ocultado por último
+  const reported = useQueryAdminReviews({ reported: true, page: 0, size: PENDING_COUNT });
+  const hidden = useQueryAdminReviews({ status: "HIDDEN", page: 0, size: 3 });
 
   const data = stats.data;
   const reviewsPerDay = data?.reviewsPerDay ?? [];
@@ -80,5 +85,16 @@ export const useHomeModel = () => {
     isLoadingReviews: reviews.isLoading,
     isReviewsError: reviews.isError,
     refetchReviews: () => void reviews.refetch(),
+    reportedReviews: reported.data?.content ?? [],
+    reportedTotal: reported.data?.page.totalElements ?? 0,
+    reportsOpen: (reported.data?.content ?? []).reduce((acc, r) => acc + (r.reportsCount ?? 0), 0),
+    hiddenReviews: hidden.data?.content ?? [],
+    hiddenTotal: hidden.data?.page.totalElements ?? 0,
+    isLoadingPending: reported.isLoading || hidden.isLoading,
+    isPendingError: reported.isError || hidden.isError,
+    refetchPending: () => {
+      void reported.refetch();
+      void hidden.refetch();
+    },
   };
 };

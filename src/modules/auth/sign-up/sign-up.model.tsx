@@ -5,6 +5,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { SchemaSignUp } from "./sign-up.schema";
 import { useNavigate } from "react-router-dom";
 import { getErrorMessage } from "@/shared/utils/error-message";
+import { useRateLimit } from "@/shared/hooks/useRateLimit";
 import { toast } from "react-toastify";
 
 type SignUpServiceProps = typeof SignUpService;
@@ -19,6 +20,7 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
     resolver: zodResolver(SchemaSignUp),
   });
 
+  const rateLimit = useRateLimit();
   const onSubmit: SubmitHandler<SignUp> = async (data) => {
     try {
       const response = await SignUpService(
@@ -34,6 +36,7 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
       }
     } catch (er) {
       // 409 usuário/e-mail já existe
+      rateLimit.register(er);
       toast.error(getErrorMessage(er, "Não foi possível criar a conta."));
     }
   };
@@ -44,5 +47,6 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
     register,
     errors,
     isSubmitting,
+    waitSeconds: rateLimit.secondsLeft,
   };
 };

@@ -12,6 +12,8 @@ type ModalProps = {
   /** Ícone opcional ao lado do título. */
   icon?: React.ReactNode;
   role?: "dialog" | "alertdialog";
+  /** Largura máxima: `md` (padrão) ou `lg`. */
+  size?: "md" | "lg";
 };
 
 export const Modal = ({
@@ -22,6 +24,7 @@ export const Modal = ({
   onClose,
   icon,
   role = "dialog",
+  size = "md",
 }: ModalProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -33,7 +36,7 @@ export const Modal = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-999999 flex items-end justify-center bg-black/60 px-4 py-6 backdrop-blur-[2px] sm:items-center"
+      className="fixed inset-0 z-999999 flex items-end justify-center bg-black/60 px-4 py-6 backdrop-blur-[2px] animate-fade-in sm:items-center"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -45,7 +48,7 @@ export const Modal = ({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-default focus:outline-none dark:border-strokedark dark:bg-boxdark"
+        className={`w-full ${size === "lg" ? "max-w-lg" : "max-w-md"} rounded-xl border border-stroke bg-white p-6 shadow-default animate-scale-in focus:outline-none dark:border-strokedark dark:bg-boxdark`}
       >
         <div className="mb-4 flex items-start gap-4">
           {icon}

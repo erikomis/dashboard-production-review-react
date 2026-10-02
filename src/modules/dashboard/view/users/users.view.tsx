@@ -2,6 +2,8 @@ import { FilterX, ShieldCheck, ShieldMinus, ShieldPlus, UserCheck, Users, UserX 
 import { Table } from "@/modules/dashboard/components/table";
 import { Pagination } from "@/modules/dashboard/components/pagination/Pagination";
 import { PageHeader } from "@/modules/dashboard/components/page-header/PageHeader";
+import { ExportCsvButton } from "@/modules/dashboard/components/export/ExportCsvButton";
+import { DensityToggle } from "@/modules/dashboard/components/table/DensityToggle";
 import { SearchInput } from "@/modules/dashboard/components/form/SearchInput";
 import { FilterSelect } from "@/modules/dashboard/components/form/FilterSelect";
 import { ConfirmModal } from "@/shared/components/Modal/confirm-modal";
@@ -59,12 +61,23 @@ export const UsersView = ({
   cancelAction,
   confirmAction,
   announcement,
+  exportCsv,
+  isExporting,
+  density,
+  setDensity,
 }: UsersViewProps) => (
   <>
     <PageHeader
       title="Usuários"
       description="Contas cadastradas no site. Conceda ou remova o perfil de administrador e desative contas quando necessário."
       breadcrumbs={[{ label: "Usuários" }]}
+      actions={
+        <ExportCsvButton
+          onExport={exportCsv}
+          isExporting={isExporting}
+          description="Baixa os usuários com os filtros atuais (CSV com ; para o Excel)"
+        />
+      }
     />
 
     <span className="sr-only" role="status" aria-live="polite">
@@ -102,15 +115,20 @@ export const UsersView = ({
             </Button>
           )}
         </div>
-        <p className="text-sm text-body dark:text-bodydark" aria-live="polite">
-          {isLoading
-            ? "Carregando usuários..."
-            : `${totalElements} ${totalElements === 1 ? "usuário" : "usuários"}${search ? ` para “${search}”` : ""}`}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-body dark:text-bodydark" aria-live="polite">
+            {isLoading
+              ? "Carregando usuários..."
+              : `${totalElements} ${totalElements === 1 ? "usuário" : "usuários"}${search ? ` para “${search}”` : ""}`}
+          </p>
+          <DensityToggle value={density} onChange={setDensity} />
+        </div>
       </div>
 
       <Table.Root
         caption="Lista de usuários"
+        stickyHeader
+        density={density}
         aria-busy={isFetching || undefined}
         className={cn("w-full table-auto text-left text-sm transition-opacity", isFetching && !isLoading && "opacity-60")}
       >

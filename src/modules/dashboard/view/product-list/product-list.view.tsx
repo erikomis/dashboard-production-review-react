@@ -3,6 +3,7 @@ import { FilterX, ImageIcon, Package, Pencil, Plus, Star, Trash2 } from "lucide-
 import { Table } from "@/modules/dashboard/components/table";
 import { Pagination } from "@/modules/dashboard/components/pagination/Pagination";
 import { PageHeader } from "@/modules/dashboard/components/page-header/PageHeader";
+import { DensityToggle } from "@/modules/dashboard/components/table/DensityToggle";
 import { SearchInput } from "@/modules/dashboard/components/form/SearchInput";
 import { FilterSelect } from "@/modules/dashboard/components/form/FilterSelect";
 import { formatNote } from "@/modules/dashboard/utils/chart-data";
@@ -55,6 +56,8 @@ export const ProductListView = ({
   handleDeleteConfirm,
   goToCreate,
   goToEdit,
+  density,
+  setDensity,
 }: ProductListViewProps) => {
   return (
     <>
@@ -78,12 +81,15 @@ export const ProductListView = ({
                 ? "Carregando produtos..."
                 : `${totalElements} ${totalElements === 1 ? "produto" : "produtos"}${search ? ` para “${search}”` : ""} · ${sortLabel.toLowerCase()}${isRankingOnlyRated ? " (só com avaliações)" : ""}`}
             </p>
-            <SearchInput
-              value={searchInput}
-              onChange={setSearchInput}
-              label="Buscar produtos pelo nome"
-              placeholder="Buscar pelo nome..."
-            />
+            <div className="flex items-center gap-3">
+              <SearchInput
+                value={searchInput}
+                onChange={setSearchInput}
+                label="Buscar produtos pelo nome"
+                placeholder="Buscar pelo nome..."
+              />
+              <DensityToggle value={density} onChange={setDensity} />
+            </div>
           </div>
           <div role="group" aria-label="Filtros de produtos" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
             <FilterSelect
@@ -129,6 +135,8 @@ export const ProductListView = ({
 
         <Table.Root
           caption="Lista de produtos"
+          stickyHeader
+          density={density}
           aria-busy={isFetching || undefined}
           className={cn("w-full table-auto text-left text-sm transition-opacity", isFetching && !isLoading && "opacity-60")}
         >

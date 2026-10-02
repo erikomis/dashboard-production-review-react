@@ -5,6 +5,7 @@ import {
   ProductPage,
   ProductPayload,
   ProductSortProperty,
+  ProductSuggestion,
 } from "@/shared/types/product";
 
 type Id = number | string;
@@ -105,5 +106,15 @@ export const ProductsService = {
       method: "DELETE",
       url: `/production/file/${imageId}`,
     });
+  },
+
+  /** GET /production/suggest — público; `q` com 2+ caracteres (senão 400), `limit` de 1 a 10. */
+  suggest: async (q: string, limit = 8) => {
+    const response = await api.request<ProductSuggestion[]>({
+      method: "GET",
+      url: "/production/suggest",
+      params: { q: q.trim(), limit },
+    });
+    return response.data;
   },
 };

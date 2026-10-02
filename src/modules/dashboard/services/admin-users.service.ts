@@ -1,4 +1,5 @@
 import { api } from "@/shared/services/api";
+import { fetchCsv } from "@/shared/services/csv-export";
 import { AdminUser, AdminUserPage } from "@/shared/types/admin";
 
 export type AdminUserParams = {
@@ -39,4 +40,8 @@ export const AdminUsersService = {
     });
     return response.data;
   },
+
+  /** GET /admin/users/export.csv — mesmos filtros da lista. */
+  exportCsv: ({ search, role, active }: Omit<AdminUserParams, "page" | "size">) =>
+    fetchCsv("/admin/users/export.csv", { search: search?.trim(), role, active }, "usuarios"),
 };

@@ -6,7 +6,7 @@ on:
     branches: ["main", "development"]
 jobs:
   test:
-    timeout-minutes: 20
+    timeout-minutes: 25
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -19,14 +19,31 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      # só o código da aplicação (test/ tem o exemplo de demonstração do Playwright)
       - name: Lint
-        run: npx eslint src
+        run: npx eslint src test/e2e playwright.config.ts
 
-      - name: Testes unitários
-        run: npx vitest run
+      - name: Tipos dos E2E
+        run: npx tsc -p tsconfig.e2e.json
+
+      - name: Testes unitários e de componente
+        run: npm run test
 
       - name: Build
         run: npm run build
         env:
           VITE_API_URL: https://example.invalid/api/v1
+
+      - name: Instalar Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      # API mockada com page.route: não precisa de backend no CI
+      - name: Testes E2E
+        run: npm run test:e2e
+
+      - name: Relatório do Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

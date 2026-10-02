@@ -8,6 +8,8 @@ import {
   useQueryImportJob,
   useQueryLatestImport,
 } from "@/modules/dashboard/hooks/useImportJob";
+import { useMutationDeduplicateCatalog } from "@/modules/dashboard/hooks/useCatalogDeduplicate";
+import { DeduplicationResult } from "@/shared/types/admin";
 import {
   elapsedSeconds,
   estimateRemainingSeconds,
@@ -83,6 +85,27 @@ export const useImportCatalogModel = () => {
     }
   });
 
+  // ---- remover duplicados ----
+  const { mutateAsync: deduplicate, isPending: isDeduplicating } = useMutationDeduplicateCatalog();
+  const [dedupeConfirmOpen, setDedupeConfirmOpen] = useState(false);
+  const [dedupeResult, setDedupeResult] = useState<DeduplicationResult | null>(null);
+  const [dedupeAnnouncement, setDedupeAnnouncement] = useState("");
+  const runDeduplicate = async () => {
+    try {
+      const result = await deduplicate();
+      setDedupeResult(result);
+      const message =
+        result.removed === 0
+          ? "Nenhum produto duplicado para remover."
+          : `${result.removed} ${result.removed === 1 ? "produto duplicado removido" : "produtos duplicados removidos"} em ${result.groups} ${result.groups === 1 ? "grupo" : "grupos"}.`;
+      toast.success(message);
+      setDedupeAnnouncement(message);
+      setDedupeConfirmOpen(false);
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Não foi possível remover os duplicados."));
+    }
+  };
+
   const isLoadingLatest = latest.isLoading;
   const loadError = latest.isError ? getErrorMessage(latest.error, "Não foi possível consultar a última importação.") : null;
 
@@ -109,5 +132,15 @@ export const useImportCatalogModel = () => {
     loadError,
     retryLatest: () => void latest.refetch(),
     announcement,
+    // duplicados
+    dedupeResult,
+    dedupeAnnouncement,
+    isDeduplicating,
+    dedupeConfirmOpen,
+    requestDeduplicate: () => setDedupeConfirmOpen(true),
+    cancelDeduplicate: () => {
+      if (!isDeduplicating) setDedupeConfirmOpen(false);
+    },
+    confirmDeduplicate: () => void runDeduplicate(),
   };
 };

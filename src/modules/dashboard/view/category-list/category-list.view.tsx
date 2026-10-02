@@ -59,7 +59,7 @@ export const CategoryListView = ({
           <SearchInput value={filter} onChange={setFilter} label="Filtrar categorias" placeholder="Filtrar por nome ou slug" />
         </div>
 
-        <Table.Root caption="Lista de categorias" aria-busy={isLoading || undefined}>
+        <Table.Root stickyHeader caption="Lista de categorias" aria-busy={isLoading || undefined}>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Categoria</Table.Th>

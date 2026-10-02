@@ -25,20 +25,20 @@ export const StatCard = ({
   isLoading,
   helper,
 }: StatCardProps) => (
-  <div className="flex flex-col rounded-xl border border-stroke bg-white p-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:p-6">
+  <div className="flex flex-col rounded-xl border border-stroke bg-white p-4 shadow-default transition-shadow hover:shadow-card-2 dark:border-strokedark dark:bg-boxdark sm:p-6">
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-body dark:text-bodydark">{title}</p>
         {isLoading ? (
           <Skeleton className="mt-2 h-9 w-16" />
         ) : (
-          <p className="mt-1 text-title-md2 font-bold text-black dark:text-white">{value ?? "—"}</p>
+          <p className="mt-1 text-title-sm font-bold tabular-nums text-black dark:text-white sm:text-title-md2">{value ?? "—"}</p>
         )}
         {helper && <p className="mt-1 text-xs text-body dark:text-bodydark">{helper}</p>}
       </div>
       <span
         aria-hidden="true"
-        className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-full", iconClassName)}
+        className={cn("hidden h-12 w-12 shrink-0 items-center justify-center rounded-full sm:flex", iconClassName)}
       >
         {icon}
       </span>
@@ -46,7 +46,7 @@ export const StatCard = ({
     {to && (
       <Link
         to={to}
-        className="mt-4 inline-flex items-center gap-1 self-start rounded text-sm font-medium text-primary hover:underline dark:text-primary-light"
+        className="mt-3 inline-flex items-center gap-1 self-start rounded text-sm font-medium sm:mt-4 text-primary hover:underline dark:text-primary-light"
       >
         {linkLabel}
         <span className="sr-only">: {title}</span>

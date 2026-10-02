@@ -1,3 +1,5 @@
+import { RateLimitNotice } from "@/shared/components/feedback/RateLimitNotice";
+import { PASSWORD_HINT } from "@/shared/utils/password-policy";
 import { Link } from "react-router-dom";
 import { CircleAlert, KeyRound, Mail } from "lucide-react";
 import { Button } from "@/shared/components/button";
@@ -9,7 +11,7 @@ import { AuthHeading } from "../AuthHeading";
 type ResetPasswordProps = ReturnType<typeof useResetPasswordModel>;
 
 export const ResetPasswordView = (props: ResetPasswordProps) => {
-  const { errors, handleSubmit, onSubmit, register, errosResponse, isSubmitting } = props;
+  const { errors, handleSubmit, onSubmit, register, errosResponse, isSubmitting, waitSeconds } = props;
   return (
     <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
       <AuthHeading
@@ -29,6 +31,7 @@ export const ResetPasswordView = (props: ResetPasswordProps) => {
         )}
       </div>
       <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isSubmitting || undefined}>
+        <RateLimitNotice secondsLeft={waitSeconds} />
         <Input
           {...register("email")}
           id="email"
@@ -58,7 +61,8 @@ export const ResetPasswordView = (props: ResetPasswordProps) => {
           id="password"
           type="password"
           autoComplete="new-password"
-          placeholder="De 6 a 20 caracteres"
+          placeholder="Mínimo de 8 caracteres"
+          hint={PASSWORD_HINT}
           error={errors.password?.message}
         >
           <Label value="Nova senha" htmlFor="password" required />
@@ -74,8 +78,8 @@ export const ResetPasswordView = (props: ResetPasswordProps) => {
           <Label value="Confirmar nova senha" htmlFor="passwordConfirm" required />
         </Input>
 
-        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting}>
-          {isSubmitting ? "Salvando..." : "Redefinir senha"}
+        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting} disabled={waitSeconds > 0}>
+          {isSubmitting ? "Salvando..." : waitSeconds > 0 ? `Aguarde ${waitSeconds} s` : "Redefinir senha"}
         </Button>
 
         <p className="mt-6 text-center text-body dark:text-bodydark">

@@ -1,4 +1,4 @@
-import { getReviewStatusMeta, parseStatusFilter, statusFilterToParam } from "./review-status";
+import { getReviewStatusMeta, parseStatusFilter, reportedFilterToParam, statusFilterToParam } from "./review-status";
 
 describe("review-status", () => {
   it("mapeia status para rótulo e cor do badge", () => {
@@ -14,5 +14,12 @@ describe("review-status", () => {
     expect(parseStatusFilter(null)).toBe("ALL");
     expect(statusFilterToParam("ALL")).toBeUndefined();
     expect(statusFilterToParam("VISIBLE")).toBe("VISIBLE");
+  });
+
+  it("aba Denunciadas vira reported=true, sem filtro de status", () => {
+    expect(parseStatusFilter("REPORTED")).toBe("REPORTED");
+    expect(statusFilterToParam("REPORTED")).toBeUndefined();
+    expect(reportedFilterToParam("REPORTED")).toBe(true);
+    expect(reportedFilterToParam("HIDDEN")).toBeUndefined();
   });
 });

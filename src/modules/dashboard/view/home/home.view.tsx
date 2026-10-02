@@ -1,13 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  EyeOff,
-  FolderTree,
-  MessageSquareText,
-  Package,
-  Star,
-  Tags,
-  Users,
-} from "lucide-react";
+import { EyeOff, FolderTree, MessageSquareText, Package, Star, Tags, Users } from "lucide-react";
 import { PageHeader } from "@/modules/dashboard/components/page-header/PageHeader";
 import { StatCard } from "@/modules/dashboard/components/stat-card/StatCard";
 import { Card } from "@/modules/dashboard/components/card/Card";
@@ -22,6 +14,7 @@ import { StarRating } from "@/shared/components/star-rating";
 import { formatDayLong, formatNote } from "@/modules/dashboard/utils/chart-data";
 import { formatDateTime, formatNumber, initials } from "@/shared/utils/format";
 import { useHomeModel } from "./home.model";
+import { PendingSection } from "./PendingSection";
 
 type HomeViewProps = ReturnType<typeof useHomeModel>;
 
@@ -33,33 +26,34 @@ const ChartSkeleton = ({ height = 220 }: { height?: number }) => (
   </div>
 );
 
-export const HomeView = ({
-  userName,
-  days,
-  setDays,
-  periodOptions,
-  theme,
-  totals,
-  averageNote,
-  ratingBuckets,
-  reviewsPerDay,
-  usersPerDay,
-  reviewsInPeriod,
-  usersInPeriod,
-  averageInPeriod,
-  reviewsPeak,
-  usersPeak,
-  topProducts,
-  topCategories,
-  isLoadingStats,
-  isRefreshingStats,
-  isStatsError,
-  refetchStats,
-  recentReviews,
-  isLoadingReviews,
-  isReviewsError,
-  refetchReviews,
-}: HomeViewProps) => {
+export const HomeView = (props: HomeViewProps) => {
+  const {
+    userName,
+    days,
+    setDays,
+    periodOptions,
+    theme,
+    totals,
+    averageNote,
+    ratingBuckets,
+    reviewsPerDay,
+    usersPerDay,
+    reviewsInPeriod,
+    usersInPeriod,
+    averageInPeriod,
+    reviewsPeak,
+    usersPeak,
+    topProducts,
+    topCategories,
+    isLoadingStats,
+    isRefreshingStats,
+    isStatsError,
+    refetchStats,
+    recentReviews,
+    isLoadingReviews,
+    isReviewsError,
+    refetchReviews,
+  } = props;
   const fmt = (value?: number) => (value === undefined ? undefined : formatNumber(value));
   const periodText = `nos últimos ${days} dias`;
   const totalRated = ratingBuckets.reduce((acc, b) => acc + b.count, 0);
@@ -80,7 +74,7 @@ export const HomeView = ({
 
       <section
         aria-label="Totais"
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 2xl:gap-5"
+        className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6 2xl:gap-5"
       >
         <StatCard
           title="Produtos"
@@ -137,6 +131,8 @@ export const HomeView = ({
         />
       </section>
 
+      <PendingSection {...props} />
+
       {isStatsError ? (
         <Card className="mt-6">
           <ErrorState title="Não foi possível carregar as estatísticas" onRetry={refetchStats} />
@@ -158,7 +154,8 @@ export const HomeView = ({
                     {reviewsInPeriod === 1 ? "avaliação" : "avaliações"} {periodText}
                     {reviewsPeak && (
                       <>
-                        {" "}· pico em {formatDayLong(reviewsPeak.date)} ({reviewsPeak.count})
+                        {" "}
+                        · pico em {formatDayLong(reviewsPeak.date)} ({reviewsPeak.count})
                       </>
                     )}
                     {averageInPeriod !== null && <> · média do período {formatNote(averageInPeriod)}</>}
@@ -259,7 +256,11 @@ export const HomeView = ({
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
-            <Card title="Produtos mais avaliados" titleId="top-products-title" description="Top 5 por número de avaliações visíveis.">
+            <Card
+              title="Produtos mais avaliados"
+              titleId="top-products-title"
+              description="Top 5 por número de avaliações visíveis."
+            >
               {isLoadingStats ? (
                 <RankSkeleton />
               ) : topProducts.length === 0 ? (
@@ -268,11 +269,17 @@ export const HomeView = ({
                 <RankedBars items={topProducts} unit="aval." label="Produtos mais avaliados" />
               )}
             </Card>
-            <Card title="Categorias mais avaliadas" titleId="top-categories-title" description="Top 5 por número de avaliações visíveis.">
+            <Card
+              title="Categorias mais avaliadas"
+              titleId="top-categories-title"
+              description="Top 5 por número de avaliações visíveis."
+            >
               {isLoadingStats ? (
                 <RankSkeleton />
               ) : topCategories.length === 0 ? (
-                <p className="py-6 text-center text-sm text-body dark:text-bodydark">Nenhuma categoria avaliada ainda.</p>
+                <p className="py-6 text-center text-sm text-body dark:text-bodydark">
+                  Nenhuma categoria avaliada ainda.
+                </p>
               ) : (
                 <RankedBars items={topCategories} unit="aval." label="Categorias mais avaliadas" />
               )}
@@ -289,7 +296,12 @@ export const HomeView = ({
                   <>
                     <strong className="font-semibold text-black dark:text-white">{usersInPeriod}</strong>{" "}
                     {usersInPeriod === 1 ? "novo usuário" : "novos usuários"} {periodText}
-                    {usersPeak && <> · pico em {formatDayLong(usersPeak.date)} ({usersPeak.count})</>}
+                    {usersPeak && (
+                      <>
+                        {" "}
+                        · pico em {formatDayLong(usersPeak.date)} ({usersPeak.count})
+                      </>
+                    )}
                   </>
                 )
               }

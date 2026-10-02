@@ -42,6 +42,7 @@ export const Card = ({
         {actions && <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div>}
       </div>
     )}
-    <div className={cn("p-5 sm:p-6", bodyClassName)}>{children}</div>
+    {/* `p-0` no corpo = conteúdo encostado nas bordas (listas): sem o padding responsivo padrão */}
+    <div className={cn(!bodyClassName?.split(/\s+/).includes("p-0") && "p-5 sm:p-6", bodyClassName)}>{children}</div>
   </section>
 );

@@ -1,3 +1,5 @@
+import { RateLimitNotice } from "@/shared/components/feedback/RateLimitNotice";
+import { PASSWORD_HINT } from "@/shared/utils/password-policy";
 import { AtSign, Mail } from "lucide-react";
 import { Input } from "@/shared/components/input";
 import { Button } from "@/shared/components/button";
@@ -9,7 +11,7 @@ import { AuthHeading } from "../AuthHeading";
 type SignUpViewProps = ReturnType<typeof useSignUpModel>;
 
 export const SignUpView = (props: SignUpViewProps) => {
-  const { errors, handleSubmit, onSubmit, register, isSubmitting } = props;
+  const { errors, handleSubmit, onSubmit, register, isSubmitting, waitSeconds } = props;
   return (
     <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
       <AuthHeading
@@ -17,6 +19,7 @@ export const SignUpView = (props: SignUpViewProps) => {
         subtitle="Você receberá um e-mail para ativar a conta antes de entrar."
       />
       <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isSubmitting || undefined}>
+        <RateLimitNotice secondsLeft={waitSeconds} />
         <Input {...register("name")} id="name" autoComplete="name" placeholder="Seu nome completo" error={errors.name?.message}>
           <Label value="Nome" htmlFor="name" required />
         </Input>
@@ -46,8 +49,8 @@ export const SignUpView = (props: SignUpViewProps) => {
           id="password"
           type="password"
           autoComplete="new-password"
-          placeholder="De 6 a 20 caracteres"
-          hint="Use de 6 a 20 caracteres."
+          placeholder="Mínimo de 8 caracteres"
+          hint={PASSWORD_HINT}
           error={errors.password?.message}
         >
           <Label value="Senha" htmlFor="password" required />
@@ -63,8 +66,8 @@ export const SignUpView = (props: SignUpViewProps) => {
           <Label value="Confirmar senha" htmlFor="passwordConfirm" required />
         </Input>
 
-        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting}>
-          {isSubmitting ? "Criando conta..." : "Criar conta"}
+        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting} disabled={waitSeconds > 0}>
+          {isSubmitting ? "Criando conta..." : waitSeconds > 0 ? `Aguarde ${waitSeconds} s` : "Criar conta"}
         </Button>
 
         <p className="mt-6 text-center text-body dark:text-bodydark">

@@ -1,3 +1,5 @@
+import { parseApiDate } from "./date";
+
 const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "short",
   timeStyle: "short",
@@ -5,11 +7,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" });
 
-const parse = (value?: string | null) => {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+const parse = parseApiDate;
 
 export const formatDateTime = (value?: string | null) => {
   const date = parse(value);

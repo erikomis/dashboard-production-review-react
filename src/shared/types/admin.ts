@@ -126,3 +126,13 @@ export interface ActivityFilters {
   /** `YYYY-MM-DD` */
   to?: string;
 }
+
+// ---------- Catálogo (/admin/catalog) ----------
+
+/** Resultado de `POST /admin/catalog/deduplicate`. */
+export interface DeduplicationResult {
+  groups: number;
+  removed: number;
+  keptIds: number[];
+  removedIds: number[];
+}

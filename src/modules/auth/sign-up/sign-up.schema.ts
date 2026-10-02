@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordPolicySchema } from "@/shared/utils/password-policy";
 
 export const SchemaSignUp = z
   .object({
@@ -12,11 +13,8 @@ export const SchemaSignUp = z
       .refine((data) => !data.includes("@"), {
         message: "O usuário não pode conter @",
       }),
-    // API aceita de 3 a 20 caracteres; exigimos 6 no mínimo por segurança
-    password: z
-      .string()
-      .min(6, { message: "A senha precisa ter no mínimo 6 caracteres" })
-      .max(20, { message: "A senha pode ter no máximo 20 caracteres" }),
+    // Política da API: 8 a 72 caracteres, com letras e números
+    password: passwordPolicySchema,
     passwordConfirm: z.string().min(1, { message: "Confirme a senha" }),
   })
   .refine((data) => data.password === data.passwordConfirm, {

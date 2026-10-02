@@ -6,6 +6,9 @@ import {
   useMutationSetUserAdmin,
   useQueryAdminUsers,
 } from "@/modules/dashboard/hooks/useAdminUsers";
+import { useCsvExport } from "@/modules/dashboard/hooks/useCsvExport";
+import { useTableDensityPreference } from "@/modules/dashboard/hooks/useTableDensityPreference";
+import { AdminUsersService } from "@/modules/dashboard/services/admin-users.service";
 import { useDebouncedValue } from "@/shared/hooks/useDebouncedValue";
 import { useMeQuery } from "@/shared/hooks/useMeQuery";
 import { AdminUser } from "@/shared/types/admin";
@@ -105,8 +108,14 @@ export const useUsersModel = () => {
     });
 
   const hasFilters = !!(search || role || active !== undefined);
+  const csv = useCsvExport(() => AdminUsersService.exportCsv({ search, role, active }), "usuários");
+  const [density, setDensity] = useTableDensityPreference();
 
   return {
+    exportCsv: csv.exportCsv,
+    isExporting: csv.isExporting,
+    density,
+    setDensity,
     users: (data?.content ?? []).map((user) => ({
       ...user,
       isAdmin: isAdminUser(user),

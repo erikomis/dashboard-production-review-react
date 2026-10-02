@@ -1,3 +1,4 @@
+import { RateLimitNotice } from "@/shared/components/feedback/RateLimitNotice";
 import { Button } from "@/shared/components/button";
 import { Link } from "react-router-dom";
 import { useSignInModel } from "./sign-in.model";
@@ -8,12 +9,13 @@ import { AuthHeading } from "../AuthHeading";
 
 type SignInViewProps = ReturnType<typeof useSignInModel>;
 export const SignInView = (props: SignInViewProps) => {
-  const { errors, handleSubmit, onSubmit, register, isPending } = props;
+  const { errors, handleSubmit, onSubmit, register, isPending, waitSeconds } = props;
 
   return (
     <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
       <AuthHeading title="Entrar no painel" subtitle="Acesso restrito a administradores." />
       <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isPending || undefined}>
+        <RateLimitNotice secondsLeft={waitSeconds} />
         <Input
           {...register("username")}
           id="username"
@@ -40,8 +42,8 @@ export const SignInView = (props: SignInViewProps) => {
             Esqueceu a senha?
           </Link>
         </div>
-        <Button type="submit" size="lg" className="w-full" isLoading={isPending}>
-          {isPending ? "Entrando..." : "Entrar"}
+        <Button type="submit" size="lg" className="w-full" isLoading={isPending} disabled={waitSeconds > 0}>
+          {isPending ? "Entrando..." : waitSeconds > 0 ? `Aguarde ${waitSeconds} s` : "Entrar"}
         </Button>
         <p className="mt-6 text-center text-body dark:text-bodydark">
           Não tem conta?{" "}
