@@ -1,6 +1,9 @@
-import { Bell, BellRing, MessageSquareText, X } from "lucide-react";
+import { Bell, BellRing, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNotificationStream } from "@/modules/dashboard/hooks/useNotificationStream";
+import { EventIcon } from "@/modules/dashboard/components/activity/EventIcon";
+import { getEntityLink, getEventMeta } from "@/modules/dashboard/utils/activity-events";
+import { formatRelativeTime } from "@/modules/dashboard/utils/relative-time";
 import { formatDateTime } from "@/shared/utils/format";
 import {
   DropdownMenu,
@@ -81,29 +84,28 @@ const DropdownNotification = () => {
             </div>
           ) : (
             <ul className="max-h-80 overflow-y-auto p-1">
-              {notifications.map((n) => (
+              {notifications.map((n) => {
+                // Mensagens antigas (sem `type`) são sempre de nova avaliação
+                const meta = getEventMeta(n.type ?? "REVIEW_CREATED");
+                const link = getEntityLink(n.entityType ?? "REVIEW", n.entityId, n.type) ?? "/dashboard/review";
+                return (
                 <li key={n.id} className="group relative">
                   <DropdownMenuItem asChild className="items-start pr-10">
-                    <Link to="/dashboard/review">
-                      <span
-                        aria-hidden="true"
-                        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light"
-                      >
-                        <MessageSquareText size={16} />
-                      </span>
+                    <Link to={link}>
+                      <EventIcon icon={meta.icon} tone={meta.tone} className="mt-0.5 h-8 w-8" />
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium text-black dark:text-white">
-                          {n.nameUser || "Usuário"}
+                          {meta.label}
+                          <span className="font-normal text-body dark:text-bodydark"> · {n.nameUser || "Usuário"}</span>
                         </span>
-                        <span className="block text-xs text-body dark:text-bodydark">{n.message}</span>
-                        {n.action && (
-                          <span className="mt-0.5 block truncate text-xs text-body dark:text-bodydark">
-                            {n.action}
-                          </span>
-                        )}
-                        <span className="mt-1 block text-[11px] text-body dark:text-bodydark">
-                          {formatDateTime(n.receivedAt)}
-                        </span>
+                        <span className="block text-xs text-body dark:text-bodydark">{n.message || n.action}</span>
+                        <time
+                          dateTime={n.at}
+                          title={formatDateTime(n.at)}
+                          className="mt-1 block text-[11px] text-body dark:text-bodydark"
+                        >
+                          {formatRelativeTime(n.at)} · {formatDateTime(n.at)}
+                        </time>
                       </span>
                     </Link>
                   </DropdownMenuItem>
@@ -116,7 +118,8 @@ const DropdownNotification = () => {
                     <X size={14} aria-hidden="true" />
                   </button>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </DropdownMenuContent>

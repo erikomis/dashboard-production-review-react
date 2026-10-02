@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { environment } from "@/environment/environment";
 import { queryClient } from "@/shared/libs/react-query";
@@ -8,6 +8,8 @@ import { NotificationEvent } from "@/shared/types/notification";
 export interface DashboardNotification extends NotificationEvent {
   id: string;
   receivedAt: string;
+  /** Quando o evento aconteceu (`occurredAt`) ou, em mensagens antigas, quando chegou. */
+  at: string;
 }
 
 const MAX_NOTIFICATIONS = 20;
@@ -21,13 +23,15 @@ export type StreamStatus = "connecting" | "open" | "error";
 
 /**
  * Assina `GET /notification/sse` (eventos padrão, sem nome → `onmessage`).
- * Payload: `{ action, message, nameUser }`. Fecha a conexão ao desmontar.
+ * Payload: `{ action, message, nameUser }` + (fase 2) `{ eventId, type, entityType, entityId, userId, occurredAt }`.
+ * Fecha a conexão ao desmontar.
  */
 export const useNotificationStream = () => {
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [status, setStatus] = useState<StreamStatus>("connecting");
   const [lastAnnouncement, setLastAnnouncement] = useState("");
+  const seenIds = useRef(new Set<string>());
 
   useEffect(() => {
     const source = new EventSource(`${environment.apiUrl}/notification/sse`, {
@@ -47,21 +51,35 @@ export const useNotificationStream = () => {
       }
       if (!payload || (!payload.message && !payload.action)) return;
 
+      const receivedAt = new Date().toISOString();
       const notification: DashboardNotification = {
-        id: newId(),
+        id: payload.eventId || newId(),
         action: payload.action ?? "",
         message: payload.message ?? "",
         nameUser: payload.nameUser ?? "",
-        receivedAt: new Date().toISOString(),
+        eventId: payload.eventId,
+        type: payload.type,
+        entityType: payload.entityType,
+        entityId: payload.entityId ?? null,
+        userId: payload.userId ?? null,
+        occurredAt: payload.occurredAt,
+        receivedAt,
+        at: payload.occurredAt || receivedAt,
       };
+
+      // o mesmo eventId pode chegar de novo após uma reconexão
+      if (seenIds.current.has(notification.id)) return;
+      seenIds.current.add(notification.id);
 
       setNotifications((prev) => [notification, ...prev].slice(0, MAX_NOTIFICATIONS));
       setUnreadCount((count) => count + 1);
       const text = `${notification.nameUser || "Alguém"}: ${notification.message || notification.action}`;
       setLastAnnouncement(`Nova notificação. ${text}`);
 
-      // Toda notificação hoje corresponde a uma nova avaliação
+      // Hoje o SSE só emite REVIEW_CREATED: atualiza avaliações, notas e estatísticas
       queryClient.invalidateQueries({ queryKey: ["reviews"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["activity"] });
 
       if (notificationToastStore.get()) {
         toast.info(text, { toastId: notification.id });
