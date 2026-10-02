@@ -1,6 +1,7 @@
 import { ReviewStatus } from "@/shared/types/review";
 
-export type StatusFilter = "ALL" | ReviewStatus;
+/** Abas da tela de avaliações. `REPORTED` = com denúncias abertas (qualquer status). */
+export type StatusFilter = "ALL" | ReviewStatus | "REPORTED";
 
 export const STATUS_META: Record<ReviewStatus, { label: string; color: "success" | "warning" }> = {
   VISIBLE: { label: "Visível", color: "success" },
@@ -13,8 +14,12 @@ export const getReviewStatusMeta = (status?: string | null) =>
 
 /** Lê `?status=` da URL com segurança. */
 export const parseStatusFilter = (value?: string | null): StatusFilter =>
-  value === "VISIBLE" || value === "HIDDEN" ? value : "ALL";
+  value === "VISIBLE" || value === "HIDDEN" || value === "REPORTED" ? value : "ALL";
 
-/** Valor enviado para a API (`undefined` = sem filtro). */
+/** Valor de `status` enviado para a API (`undefined` = sem filtro). */
 export const statusFilterToParam = (filter: StatusFilter): ReviewStatus | undefined =>
-  filter === "ALL" ? undefined : filter;
+  filter === "VISIBLE" || filter === "HIDDEN" ? filter : undefined;
+
+/** Valor de `reported` enviado para a API. */
+export const reportedFilterToParam = (filter: StatusFilter): true | undefined =>
+  filter === "REPORTED" ? true : undefined;

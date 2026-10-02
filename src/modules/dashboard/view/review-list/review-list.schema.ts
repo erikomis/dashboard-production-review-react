@@ -9,6 +9,15 @@ export const hideReviewSchema = z.object({
     .max(255, { message: "O motivo deve ter no máximo 255 caracteres" }),
 });
 
+/** Resposta oficial: 1 a 1000 caracteres (regra da API). */
+export const replySchema = z.object({
+  text: z
+    .string()
+    .trim()
+    .min(1, { message: "Escreva a resposta antes de publicar" })
+    .max(1000, { message: "A resposta deve ter no máximo 1000 caracteres" }),
+});
+
 const optionalPositive = z.coerce.number().int().positive().optional().catch(undefined);
 
 /** Filtros lidos da URL; valores inválidos são descartados. */
