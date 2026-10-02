@@ -28,3 +28,6 @@ dist-ssr
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# TypeScript (tsc -b) e sessão dos E2E contra a API real
+*.tsbuildinfo
+/test/.auth/
