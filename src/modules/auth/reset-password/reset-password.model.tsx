@@ -6,6 +6,7 @@ import { SchemaResetPassword } from "./reset-password.schema";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getErrorMessage } from "@/shared/utils/error-message";
+import { useRateLimit } from "@/shared/hooks/useRateLimit";
 import { toast } from "react-toastify";
 
 type ResetPasswordService = typeof ResetPasswordService;
@@ -23,6 +24,7 @@ export const useResetPasswordModel = (service: ResetPasswordService) => {
     defaultValues: { email: searchParams.get("email") ?? "" },
   });
 
+  const rateLimit = useRateLimit();
   const onSubmit = async ({ email, password, recoveryCode }: ResetPassword) => {
     setErrorsResponse("");
     try {
@@ -31,6 +33,7 @@ export const useResetPasswordModel = (service: ResetPasswordService) => {
       navigate("/", { replace: true });
     } catch (er) {
       // 400 código inválido
+      rateLimit.register(er);
       setErrorsResponse(getErrorMessage(er, "Não foi possível alterar a senha."));
     }
   };
@@ -41,5 +44,6 @@ export const useResetPasswordModel = (service: ResetPasswordService) => {
     handleSubmit,
     onSubmit,
     isSubmitting,
+    waitSeconds: rateLimit.secondsLeft,
   };
 };

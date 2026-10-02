@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { ForgotPassword } from "./forgot-password.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getErrorMessage } from "@/shared/utils/error-message";
+import { useRateLimit } from "@/shared/hooks/useRateLimit";
 
 type ForgotPasswordServiceProps = typeof ForgotPasswordService;
 
@@ -19,6 +20,7 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
     resolver: zodResolver(SchemaForgotPassword),
   });
 
+  const rateLimit = useRateLimit();
   const onSubmit = async (data: ForgotPassword) => {
     try {
       await service(data.email);
@@ -26,6 +28,7 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
       navigate(`/reset-password?email=${encodeURIComponent(data.email)}`);
     } catch (er) {
       // 404 e-mail não cadastrado
+      rateLimit.register(er);
       toast.error(getErrorMessage(er, "Não foi possível enviar o código."));
     }
   };
@@ -36,5 +39,6 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
     errors,
     onSubmit,
     isSubmitting,
+    waitSeconds: rateLimit.secondsLeft,
   };
 };

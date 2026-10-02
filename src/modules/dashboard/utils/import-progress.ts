@@ -1,3 +1,4 @@
+import { apiTime } from "@/shared/utils/date";
 import { ImportJob, ImportStatus } from "@/shared/types/admin";
 
 /** Percentual inteiro 0–100, seguro contra divisão por zero e valores fora da faixa. */
@@ -50,8 +51,8 @@ export const formatDuration = (seconds: number) => {
 /** Duração entre início e fim (ou agora), em segundos. */
 export const elapsedSeconds = (startedAt?: string | null, finishedAt?: string | null, now = Date.now()) => {
   if (!startedAt) return 0;
-  const start = new Date(startedAt).getTime();
-  const end = finishedAt ? new Date(finishedAt).getTime() : now;
+  const start = apiTime(startedAt);
+  const end = finishedAt ? apiTime(finishedAt) : now;
   if (Number.isNaN(start) || Number.isNaN(end)) return 0;
   return Math.max(0, Math.round((end - start) / 1000));
 };
