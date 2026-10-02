@@ -1,37 +1,10 @@
+import { User } from "@/shared/types/user";
 import { api } from "./api";
 
-type permission = {
-  id: number;
-  name: string;
-};
-
-type role = {
-  id: number;
-  name: string;
-  permissions: permission[];
-};
-
-type user = {
-  id: number;
-  name: string;
-  email: string;
-  username: string;
-  roles: role[];
-  active: boolean;
-};
 export const me = async () => {
-  try {
-    const response = await api.request<user>({
-      url: "/user/me",
-      method: "GET",
-      withCredentials: true,
-    });
-    return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(error.request.response.data);
-  }
+  const response = await api.request<User>({
+    url: "/user/me",
+    method: "GET",
+  });
+  return response.data;
 };
