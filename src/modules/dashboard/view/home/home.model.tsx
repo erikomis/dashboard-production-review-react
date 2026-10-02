@@ -1,56 +1,84 @@
-import { useQueryProducts } from "@/modules/dashboard/hooks/useQueryProducts";
-import { useQueryCategory } from "@/modules/dashboard/hooks/useQueryCategory";
-import { useQuerySubCategory } from "@/modules/dashboard/hooks/useQuerySubCategory";
+import { useSearchParams } from "react-router-dom";
+import { useQueryAdminStats } from "@/modules/dashboard/hooks/useQueryAdminStats";
 import { useQueryReviews } from "@/modules/dashboard/hooks/useQueryReviews";
+import {
+  chartTheme,
+  PERIOD_OPTIONS,
+  peakDay,
+  sumCounts,
+  toRatingBuckets,
+  weightedAverage,
+} from "@/modules/dashboard/utils/chart-data";
+import useColorMode from "@/shared/hooks/useColorMode";
 import { useMeQuery } from "@/shared/hooks/useMeQuery";
+import { homePeriodSchema } from "./home.schema";
+import { HomePeriod } from "./home.type";
 
-/** Quantas avaliações recentes usar para a média e a distribuição de notas. */
-const REVIEW_SAMPLE = 100;
 const RECENT_COUNT = 5;
 
 export const useHomeModel = () => {
   const { data: user } = useMeQuery();
-  // size=1: só precisamos de page.totalElements
-  const products = useQueryProducts({ page: 0, size: 1 });
-  const categories = useQueryCategory();
-  const subCategories = useQuerySubCategory();
-  const reviews = useQueryReviews(0, REVIEW_SAMPLE);
+  const [colorMode] = useColorMode();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const days = homePeriodSchema.parse(searchParams.get("days") ?? undefined) as HomePeriod;
 
-  const totalProducts = products.data?.page.totalElements;
-  const totalReviews = reviews.data?.page.totalElements;
-  const totalCategories = categories.data?.length;
-  const totalSubCategories = subCategories.data?.length;
+  const setDays = (value: HomePeriod) =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === 30) next.delete("days");
+        else next.set("days", String(value));
+        return next;
+      },
+      { replace: true }
+    );
 
-  const sample = reviews.data?.content ?? [];
-  const recentReviews = sample.slice(0, RECENT_COUNT);
-  const avgRating =
-    sample.length > 0 ? sample.reduce((acc, r) => acc + r.note, 0) / sample.length : null;
+  const stats = useQueryAdminStats(days);
+  const reviews = useQueryReviews(0, RECENT_COUNT);
 
-  const distribution = [5, 4, 3, 2, 1].map((note) => {
-    const count = sample.filter((r) => r.note === note).length;
-    return { note, count, percent: sample.length ? Math.round((count / sample.length) * 100) : 0 };
-  });
-
-  const isSampleTruncated = (totalReviews ?? 0) > sample.length;
-
-  const refetchReviews = () => reviews.refetch();
+  const data = stats.data;
+  const reviewsPerDay = data?.reviewsPerDay ?? [];
+  const usersPerDay = data?.usersPerDay ?? [];
+  const reviewsInPeriod = sumCounts(reviewsPerDay);
+  const usersInPeriod = sumCounts(usersPerDay);
 
   return {
     userName: user?.name,
-    totalProducts,
-    totalCategories,
-    totalSubCategories,
-    totalReviews,
-    isLoadingProducts: products.isLoading,
-    isLoadingCategories: categories.isLoading,
-    isLoadingSubCategories: subCategories.isLoading,
+    days,
+    setDays,
+    periodOptions: PERIOD_OPTIONS.map((value) => ({ value, label: `${value} dias` })),
+    theme: chartTheme(colorMode),
+    totals: data?.totals,
+    averageNote: data && data.totals.reviews > 0 ? data.averageNote : null,
+    ratingBuckets: toRatingBuckets(data?.ratingDistribution),
+    reviewsPerDay,
+    usersPerDay,
+    reviewsInPeriod,
+    usersInPeriod,
+    averageInPeriod: weightedAverage(reviewsPerDay),
+    reviewsPeak: peakDay(reviewsPerDay),
+    usersPeak: peakDay(usersPerDay),
+    topProducts: (data?.topProducts ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      value: p.totalReviews,
+      averageNote: p.averageNote,
+      to: `/dashboard/products/${p.id}`,
+    })),
+    topCategories: (data?.topCategories ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      value: c.totalReviews,
+      averageNote: c.averageNote,
+      to: `/dashboard/categories/${c.id}`,
+    })),
+    isLoadingStats: stats.isLoading,
+    isRefreshingStats: stats.isFetching && !stats.isLoading,
+    isStatsError: stats.isError,
+    refetchStats: () => void stats.refetch(),
+    recentReviews: reviews.data?.content ?? [],
     isLoadingReviews: reviews.isLoading,
     isReviewsError: reviews.isError,
-    refetchReviews,
-    avgRating,
-    sampleSize: sample.length,
-    isSampleTruncated,
-    distribution,
-    recentReviews,
+    refetchReviews: () => void reviews.refetch(),
   };
 };
