@@ -4,6 +4,7 @@ import { Thead } from "./Thead";
 import { Th } from "./Th";
 import { Tr } from "./Tr";
 import { Td } from "./Td";
+import { TableLoadingRows, TableMessageRow } from "./TableStatus";
 
 export const Table = {
   Root,
@@ -12,4 +13,6 @@ export const Table = {
   Th,
   Td,
   Tr,
+  LoadingRows: TableLoadingRows,
+  MessageRow: TableMessageRow,
 };
