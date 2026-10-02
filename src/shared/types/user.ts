@@ -17,3 +17,6 @@ export interface User {
   roles: Role[];
   active: boolean;
 }
+
+export const isAdmin = (user?: Pick<User, "roles"> | null) =>
+  !!user?.roles?.some((role) => role.name === "ADMIN");

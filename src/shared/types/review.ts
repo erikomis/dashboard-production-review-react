@@ -1,9 +1,23 @@
+import { Page } from "./api";
+
 export interface Review {
-  id: string;
+  id: number;
   title: string;
-  content: string;
-  rating: number;
-  productId: string;
-  product?: { id: string; name: string };
+  description: string;
+  note: number;
+  productId: number;
+  userId: number;
   createdAt?: string;
+  /** Preenchido na listagem; vem `null` em `GET /review/{id}`. */
+  productName?: string | null;
+  userName?: string | null;
 }
+
+export interface ReviewPayload {
+  title: string;
+  description: string;
+  note: number;
+  productId: number;
+}
+
+export type ReviewPage = Page<Review>;
