@@ -5,9 +5,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useQueryProductById } from "@/modules/dashboard/hooks/useQueryProducts";
 import {
+  useMutationDeleteProductImage,
   useMutationUpdateProduct,
   useMutationUploadProductImage,
 } from "@/modules/dashboard/hooks/useMutationProduct";
+import { useDeleteDialog } from "@/modules/dashboard/hooks/useDeleteDialog";
+import { getImageSourceLabel } from "@/modules/dashboard/utils/product-sort";
 import { useSlugField } from "@/modules/dashboard/hooks/useSlugField";
 import { useSubCategoryOptions } from "@/modules/dashboard/hooks/useSubCategoryOptions";
 import { queryClient } from "@/shared/libs/react-query";
@@ -23,6 +26,7 @@ export const useEditProductModel = () => {
   const navigate = useNavigate();
   const { mutateAsync: updateProduct, isPending } = useMutationUpdateProduct();
   const { mutateAsync: uploadImage, isPending: isUploading } = useMutationUploadProductImage();
+  const { mutateAsync: deleteImage } = useMutationDeleteProductImage();
   const { data, isLoading, isError, error, refetch } = useQueryProductById(id);
   const options = useSubCategoryOptions();
 
@@ -104,6 +108,20 @@ export const useEditProductModel = () => {
     }
   };
 
+  // ---- Exclusão de imagem (DELETE /production/file/{id}) ----
+  const imageDialog = useDeleteDialog({
+    remove: (imageId) => deleteImage(imageId),
+    successMessage: "Imagem excluída com sucesso!",
+    errorFallback: "Não foi possível excluir a imagem.",
+  });
+
+  const images = (data?.images ?? []).map((image) => ({
+    id: image.id,
+    urlImage: image.urlImage,
+    sourceLabel: getImageSourceLabel(image.urlImage),
+    isCover: image.urlImage === data?.imageUrl,
+  }));
+
   const loadError = isError
     ? getErrorStatus(error) === 404
       ? { title: "Produto não encontrado", description: "Ele pode ter sido excluído." }
@@ -116,7 +134,17 @@ export const useEditProductModel = () => {
 
   return {
     productName: data?.name,
-    imageUrl: data?.imageUrl ?? null,
+    images,
+    imageDelete: {
+      target: imageDialog.deleteTarget,
+      isDeleting: imageDialog.isDeleting,
+      request: imageDialog.handleDeleteRequest,
+      cancel: imageDialog.handleDeleteCancel,
+      confirm: imageDialog.handleDeleteConfirm,
+    },
+    reviewsLink: id ? `/dashboard/review?product=${id}` : undefined,
+    averageNote: data?.averageNote ?? null,
+    totalReviews: data?.totalReviews ?? 0,
     nameField,
     slugField,
     descriptionField: register("description"),
