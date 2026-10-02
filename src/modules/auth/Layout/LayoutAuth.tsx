@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { MessageSquareText } from "lucide-react";
+import { BrandMark } from "@/shared/components/svgs/BrandMark";
 import { Logo } from "@/shared/components/svgs/Logo";
 
 export const LayoutAuth = () => {
@@ -9,7 +9,10 @@ export const LayoutAuth = () => {
         <div className="flex flex-wrap items-stretch">
           <div className="hidden w-full bg-gray-2 dark:bg-meta-4/40 xl:flex xl:w-1/2 xl:items-center xl:justify-center">
             <div className="px-16 py-17.5 text-center">
-              <p className="text-lg font-semibold text-black dark:text-white">Production Review</p>
+              <p className="flex items-center justify-center gap-3 font-display text-2xl font-bold text-black dark:text-white">
+                <BrandMark />
+                ReviewStore
+              </p>
               <p className="mt-2 text-body dark:text-bodydark">
                 Painel administrativo do catálogo e das avaliações.
               </p>
@@ -21,13 +24,8 @@ export const LayoutAuth = () => {
 
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l">
             <div className="flex items-center gap-3 px-6 pt-8 sm:px-12.5 xl:hidden">
-              <span
-                aria-hidden="true"
-                className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white"
-              >
-                <MessageSquareText size={22} />
-              </span>
-              <span className="font-semibold text-black dark:text-white">Production Review</span>
+              <BrandMark />
+              <span className="font-display font-bold text-black dark:text-white">ReviewStore · Admin</span>
             </div>
             <Outlet />
           </div>

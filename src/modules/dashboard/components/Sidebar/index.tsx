@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ChevronsLeft, ChevronsRight, MessageSquareText, X } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, X } from "lucide-react";
+import { BrandMark } from "@/shared/components/svgs/BrandMark";
 import { cn } from "@/shared/utils/utils";
 import SidebarItem from "./SidebarItem";
 import { navGroups } from "./nav-items";
@@ -61,16 +62,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, collapsed, setCollapsed }: Sideb
             onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light"
           >
-            <span
-              aria-hidden="true"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-white"
-            >
-              <MessageSquareText size={22} />
-            </span>
+            <BrandMark />
             <span className={cn("leading-tight", collapsed && "lg:sr-only")}>
-              <span className="block text-lg font-bold text-white">Production</span>
+              <span className="block font-display text-lg font-bold text-white">ReviewStore</span>
               <span className="block text-xs font-medium uppercase tracking-widest text-bodydark">
-                Review · Admin
+                Painel admin
               </span>
             </span>
           </Link>

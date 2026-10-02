@@ -5,8 +5,10 @@ export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   darkMode: "class",
   theme: {
+    // Mesmo par tipográfico do site: Inter no texto, Plus Jakarta Sans nos títulos.
     fontFamily: {
       satoshi: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      display: ['"Plus Jakarta Sans"', "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
     },
     screens: {
       "2xsm": "375px",
@@ -57,6 +59,8 @@ export default {
         danger: "#D34053",
         "danger-light": "#FF8A98",
         warning: "#FFA70B",
+        // estrela das avaliações: mesma cor do site (3.2:1 sobre branco)
+        star: "#D97706",
         "warning-dark": "#9A5B00",
       },
       fontSize: {

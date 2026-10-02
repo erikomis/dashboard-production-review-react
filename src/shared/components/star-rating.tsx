@@ -20,7 +20,7 @@ export const StarRating = ({ value, size = 16, className }: StarRatingProps) => 
         aria-hidden="true"
         className={
           i < Math.round(value)
-            ? "fill-warning text-warning"
+            ? "fill-star text-star"
             : "fill-stroke text-stroke dark:fill-strokedark dark:text-strokedark"
         }
       />
@@ -77,8 +77,8 @@ export const StarRatingInput = ({ value, onChange, name, legend, error }: StarRa
                 className={cn(
                   "transition-colors",
                   active
-                    ? "fill-warning text-warning"
-                    : "fill-transparent text-body hover:text-warning dark:text-bodydark"
+                    ? "fill-star text-star"
+                    : "fill-transparent text-body hover:text-star dark:text-bodydark"
                 )}
               />
             </label>

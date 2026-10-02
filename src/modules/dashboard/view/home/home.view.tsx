@@ -124,13 +124,13 @@ export const HomeView = ({
                   <li key={note} className="flex items-center gap-3 text-sm">
                     <span className="flex w-8 shrink-0 items-center gap-1 text-black dark:text-white">
                       {note}
-                      <Star size={12} aria-hidden="true" className="fill-warning text-warning" />
+                      <Star size={12} aria-hidden="true" className="fill-star text-star" />
                     </span>
                     <span
                       className="h-2 flex-1 overflow-hidden rounded-full bg-stroke dark:bg-meta-4"
                       aria-hidden="true"
                     >
-                      <span className="block h-full rounded-full bg-warning" style={{ width: `${percent}%` }} />
+                      <span className="block h-full rounded-full bg-star" style={{ width: `${percent}%` }} />
                     </span>
                     <span className="w-16 shrink-0 text-right text-body dark:text-bodydark">
                       {count} <span className="sr-only">avaliações com nota {note}, </span>({percent}%)
