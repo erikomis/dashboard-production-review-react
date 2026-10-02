@@ -1,82 +1,110 @@
-import { Package } from "lucide-react";
-import { Input } from "@/shared/components/input";
-import { Label } from "@/shared/components/label";
-import { Button } from "@/shared/components/button";
+import { PageHeader } from "@/modules/dashboard/components/page-header/PageHeader";
+import { EntityFormLayout } from "@/modules/dashboard/components/entity-form/EntityFormLayout";
+import { CatalogBasicFields } from "@/modules/dashboard/components/entity-form/CatalogBasicFields";
+import { ProductClassificationSection } from "@/modules/dashboard/components/entity-form/ProductClassificationSection";
+import { ProductImageCard } from "@/modules/dashboard/components/entity-form/ProductImageCard";
+import { ConfirmModal } from "@/shared/components/Modal/confirm-modal";
+import { buttonVariants } from "@/shared/components/button-variants";
+import { formatNote } from "@/modules/dashboard/utils/chart-data";
+import { Link } from "react-router-dom";
+import { MessageSquareText } from "lucide-react";
 import { useEditProductModel } from "./edit-product.model";
 
 type EditProductViewProps = ReturnType<typeof useEditProductModel>;
 
 export const EditProductView = ({
-  register,
-  handleSubmit,
+  productName,
+  images,
+  imageDelete,
+  reviewsLink,
+  averageNote,
+  totalReviews,
+  nameField,
+  slugField,
+  descriptionField,
+  subCategoryField,
+  regenerateSlug,
   errors,
   isPending,
   isLoading,
+  loadError,
+  options,
   onSubmit,
-  navigate,
+  onCancel,
+  upload,
 }: EditProductViewProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <span className="text-gray-500">Carregando...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-10 overflow-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-black dark:text-white">Editar Produto</h2>
-        <button
-          onClick={() => navigate("/dashboard/products")}
-          className="text-sm text-gray-500 hover:text-black dark:hover:text-white"
+    <>
+      <PageHeader
+        title="Editar produto"
+        description={productName ? `Alterando “${productName}”.` : "Atualize os dados do produto."}
+        breadcrumbs={[{ label: "Produtos", to: "/dashboard/products" }, { label: "Editar" }]}
+        actions={
+          reviewsLink && !isLoading && !loadError ? (
+            <Link to={reviewsLink} className={buttonVariants({ color: "outline" })}>
+              <MessageSquareText size={18} aria-hidden="true" />
+              {totalReviews > 0
+                ? `${totalReviews} ${totalReviews === 1 ? "avaliação" : "avaliações"} · ${formatNote(averageNote)}`
+                : "Ver avaliações"}
+            </Link>
+          ) : undefined
+        }
+      />
+      <div className="flex flex-col gap-6">
+        <EntityFormLayout
+          ariaLabel="Edição de produto"
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+          isPending={isPending}
+          isLoading={isLoading}
+          loadError={loadError}
+          submitLabel="Salvar alterações"
         >
-          ← Voltar
-        </button>
+          <CatalogBasicFields
+            entityLabel="página do produto"
+            namePlaceholder="Ex.: Smartphone X"
+            descriptionPlaceholder="Principais características do produto"
+            nameField={nameField}
+            slugField={slugField}
+            descriptionField={descriptionField}
+            regenerateSlug={regenerateSlug}
+            errors={errors}
+            descriptionMax={255}
+            descriptionRows={5}
+          />
+          <ProductClassificationSection
+            field={subCategoryField}
+            subCategories={options.subCategories}
+            categories={options.categories}
+            isLoading={options.isLoading}
+            isError={options.isError}
+            error={errors.subCategorieId?.message}
+          />
+        </EntityFormLayout>
+
+        {!isLoading && !loadError && (
+          <ProductImageCard
+            productName={productName}
+            images={images}
+            onDeleteRequest={imageDelete.request}
+            {...upload}
+          />
+        )}
       </div>
 
-      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-          <Input
-            color="primary"
-            id="name"
-            type="text"
-            placeholder="Nome do produto"
-            icon={<Package size={20} />}
-            error={errors.name?.message}
-            {...register("name")}
-          >
-            <Label value="Nome:" htmlFor="name" />
-          </Input>
-
-          <div className="flex flex-col gap-1">
-            <Label value="Descrição:" htmlFor="description" />
-            <textarea
-              id="description"
-              {...register("description")}
-              rows={4}
-              placeholder="Descreva o produto..."
-              className="w-full rounded-lg border border-stroke bg-transparent py-3 px-4 text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary resize-none"
-            />
-            {errors.description && (
-              <span className="text-sm text-danger">{errors.description.message}</span>
-            )}
-          </div>
-
-          <div className="flex gap-3 mt-2">
-            <Button type="submit" color="default" disabled={isPending}>
-              {isPending ? "Salvando..." : "Salvar alterações"}
-            </Button>
-            <Button
-              type="button"
-              color="outline"
-              onClick={() => navigate("/dashboard/products")}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+      <ConfirmModal
+        isOpen={!!imageDelete.target}
+        title="Excluir imagem"
+        message={
+          <>
+            Deseja excluir a <strong className="text-black dark:text-white">{imageDelete.target?.name}</strong> de “
+            {productName}”? Imagens importadas (externas) só deixam de ser exibidas; o arquivo original não é apagado.
+          </>
+        }
+        isLoading={imageDelete.isDeleting}
+        onConfirm={imageDelete.confirm}
+        onClose={imageDelete.cancel}
+      />
+    </>
   );
 };

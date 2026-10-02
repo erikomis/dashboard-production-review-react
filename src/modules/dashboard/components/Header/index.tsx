@@ -1,129 +1,67 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Menu, Search } from "lucide-react";
 import DarkModeSwitcher from "./DarkModeSwitcher";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 
 const Header = (props: {
-  sidebarOpen: string | boolean | undefined;
+  sidebarOpen: boolean;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
+  // Busca global de produtos (a API suporta `search` parcial no nome)
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const q = search.trim().toLowerCase();
-    if (!q) return;
-
-    if (q.includes("produto")) return navigate("/dashboard/products");
-    if (q.includes("categor")) return navigate("/dashboard/categories");
-    if (q.includes("subcategor") || q.includes("sub-categor"))
-      return navigate("/dashboard/sub-categories");
-    if (q.includes("avali") || q.includes("review"))
-      return navigate("/dashboard/review");
-    if (q.includes("perfil") || q.includes("profile"))
-      return navigate("/dashboard/profile");
-    if (q.includes("config") || q.includes("setting"))
-      return navigate("/dashboard/settings");
+    const q = search.trim();
+    navigate(q ? `/dashboard/products?search=${encodeURIComponent(q)}` : "/dashboard/products");
+    setSearch("");
   };
 
   return (
-    <header className="sticky top-0 flex w-full bg-white z-999 drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
-      <div className="flex items-center justify-between flex-grow px-4 py-4 shadow-2 md:px-6 2xl:px-11">
-        <div className="flex items-center gap-2 sm:gap-4 lg:hidden">
-          {/* Hamburger Toggle */}
+    <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+      <div className="flex flex-grow items-center justify-between gap-3 px-4 py-3 md:px-6 2xl:px-11">
+        <div className="flex items-center gap-3 lg:hidden">
           <button
+            type="button"
             aria-controls="sidebar"
+            aria-expanded={props.sidebarOpen}
+            aria-label="Abrir menu"
             onClick={(e) => {
               e.stopPropagation();
               props.setSidebarOpen(!props.sidebarOpen);
             }}
-            className="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-stroke bg-white text-black shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:border-strokedark dark:bg-boxdark dark:text-white"
           >
-            <span className="relative block h-5.5 w-5.5 cursor-pointer">
-              <span className="absolute right-0 w-full h-full du-block">
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-[0] duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!w-full delay-300"
-                  }`}
-                ></span>
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-150 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "delay-400 !w-full"
-                  }`}
-                ></span>
-                <span
-                  className={`relative left-0 top-0 my-1 block h-0.5 w-0 rounded-sm bg-black delay-200 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!w-full delay-500"
-                  }`}
-                ></span>
-              </span>
-              <span className="absolute right-0 w-full h-full rotate-45">
-                <span
-                  className={`absolute left-2.5 top-0 block h-full w-0.5 rounded-sm bg-black delay-300 duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!h-0 !delay-[0]"
-                  }`}
-                ></span>
-                <span
-                  className={`delay-400 absolute left-0 top-2.5 block h-0.5 w-full rounded-sm bg-black duration-200 ease-in-out dark:bg-white ${
-                    !props.sidebarOpen && "!h-0 !delay-200"
-                  }`}
-                ></span>
-              </span>
-            </span>
+            <Menu size={22} aria-hidden="true" />
           </button>
+        </div>
 
-          <Link className="flex-shrink-0 block lg:hidden" to="/">
-            <img
-              width={32}
-              height={32}
-              src={"/images/logo/logo-icon.svg"}
-              alt="Logo"
+        <form role="search" onSubmit={handleSearch} className="hidden flex-1 sm:block">
+          <label htmlFor="global-search" className="sr-only">
+            Buscar produtos
+          </label>
+          <div className="relative max-w-md">
+            <Search
+              size={18}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-body dark:text-bodydark"
             />
-          </Link>
-        </div>
+            <input
+              id="global-search"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar produtos pelo nome..."
+              className="h-10 w-full rounded-lg border border-transparent bg-gray-2 pl-10 pr-4 text-sm text-black outline-none placeholder:text-body/80 focus:border-primary dark:bg-meta-4 dark:text-white dark:placeholder:text-bodydark/70"
+            />
+          </div>
+        </form>
 
-        {/* Search */}
-        <div className="hidden sm:block">
-          <form onSubmit={handleSearch}>
-            <div className="relative">
-              <button type="submit" className="absolute left-0 -translate-y-1/2 top-1/2">
-                <svg
-                  className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M9.16666 3.33332C5.945 3.33332 3.33332 5.945 3.33332 9.16666C3.33332 12.3883 5.945 15 9.16666 15C12.3883 15 15 12.3883 15 9.16666C15 5.945 12.3883 3.33332 9.16666 3.33332ZM1.66666 9.16666C1.66666 5.02452 5.02452 1.66666 9.16666 1.66666C13.3088 1.66666 16.6667 5.02452 16.6667 9.16666C16.6667 13.3088 13.3088 16.6667 9.16666 16.6667C5.02452 16.6667 1.66666 13.3088 1.66666 9.16666Z"
-                    fill=""
-                  />
-                  <path
-                    fillRule="evenodd"
-                    clipRule="evenodd"
-                    d="M13.2857 13.2857C13.6112 12.9603 14.1388 12.9603 14.4642 13.2857L18.0892 16.9107C18.4147 17.2362 18.4147 17.7638 18.0892 18.0892C17.7638 18.4147 17.2362 18.4147 16.9107 18.0892L13.2857 14.4642C12.9603 14.1388 12.9603 13.6112 13.2857 13.2857Z"
-                    fill=""
-                  />
-                </svg>
-              </button>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Pesquisar no menu..."
-                className="w-full pr-4 font-medium bg-transparent pl-9 focus:outline-none xl:w-125"
-              />
-            </div>
-          </form>
-        </div>
-
-        <div className="flex items-center gap-3 2xsm:gap-7">
-          <ul className="flex items-center gap-2 2xsm:gap-4">
+        <div className="flex items-center gap-3 2xsm:gap-5">
+          <ul className="flex items-center gap-3 2xsm:gap-4">
             <DarkModeSwitcher />
             <DropdownNotification />
           </ul>

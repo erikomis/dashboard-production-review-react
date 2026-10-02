@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   frontend:
     container_name: frontend
-    build: .
+    # imagem privada no GitHub Container Registry; o deploy define IMAGE_TAG=sha-<commit>
+    image: ghcr.io/erikomis/dashboard-production-review-react:${IMAGE_TAG:-latest}
     ports:
       - "5173:5173"
     restart: unless-stopped

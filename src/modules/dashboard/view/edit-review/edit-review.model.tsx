@@ -1,67 +1,79 @@
-import { useEffect, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm, useController, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { ReviewService } from "@/modules/dashboard/services/review.service";
+import { useQueryReviewById } from "@/modules/dashboard/hooks/useQueryReviews";
 import { useMutationUpdateReview } from "@/modules/dashboard/hooks/useMutationReview";
+import { useProductOptions } from "@/modules/dashboard/hooks/useProductOptions";
+import { getErrorMessage, getErrorStatus } from "@/shared/utils/error-message";
 import { SchemaEditReview } from "./edit-review.schema";
 import { EditReviewValues } from "./edit-review.type";
 
 export const useEditReviewModel = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [hoverRating, setHoverRating] = useState(0);
   const { mutateAsync: updateReview, isPending } = useMutationUpdateReview();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["reviews", id],
-    queryFn: () => ReviewService.getById(id!),
-    enabled: !!id,
-  });
+  const { data, isLoading, isError, error, refetch } = useQueryReviewById(id);
+  const productOptions = useProductOptions();
 
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<EditReviewValues>({
     resolver: zodResolver(SchemaEditReview),
-    defaultValues: { rating: 0 },
+    defaultValues: { title: "", description: "", note: 0 },
   });
-
-  const rating = watch("rating");
+  const { field: noteField } = useController({ control, name: "note" });
 
   useEffect(() => {
-    if (data) {
-      reset({ title: data.title, content: data.content, rating: data.rating });
+    if (data && productOptions.isReady) {
+      reset({
+        title: data.title,
+        description: data.description,
+        note: data.note,
+        productId: data.productId,
+      });
     }
-  }, [data, reset]);
+  }, [data, productOptions.isReady, reset]);
 
   const onSubmit: SubmitHandler<EditReviewValues> = async (formData) => {
     try {
-      await updateReview({ id: id!, ...formData, productId: data!.productId });
+      await updateReview({ id: id!, ...formData });
       toast.success("Avaliação atualizada com sucesso!");
       navigate("/dashboard/review");
-    } catch {
-      toast.error("Erro ao atualizar avaliação. Tente novamente.");
+    } catch (err) {
+      // 403 quando não é o autor nem ADMIN
+      toast.error(getErrorMessage(err, "Erro ao atualizar avaliação. Tente novamente."));
     }
   };
 
+  const loadError = isError
+    ? getErrorStatus(error) === 404
+      ? { title: "Avaliação não encontrada", description: "Ela pode ter sido excluída." }
+      : {
+          title: "Erro ao carregar a avaliação",
+          description: getErrorMessage(error),
+          onRetry: () => void refetch(),
+        }
+    : null;
+
   return {
-    register,
-    handleSubmit,
-    setValue,
+    reviewTitle: data?.title,
+    titleField: register("title"),
+    descriptionField: register("description"),
+    productField: register("productId"),
+    note: Number(noteField.value) || 0,
+    setNote: (value: number) => noteField.onChange(value),
     errors,
     isPending,
-    isLoading,
-    onSubmit,
-    navigate,
-    rating,
-    hoverRating,
-    setHoverRating,
+    isLoading: isLoading || productOptions.isLoading,
+    loadError,
+    productOptions,
+    onSubmit: handleSubmit(onSubmit),
+    onCancel: () => navigate("/dashboard/review"),
   };
 };

@@ -6,3 +6,11 @@ export const useQuerySubCategory = () =>
     queryKey: ["sub-categories"],
     queryFn: () => SubCategoryService.list(),
   });
+
+export const useQuerySubCategoryById = (id?: string) =>
+  useQuery({
+    queryKey: ["sub-categories", "detail", id],
+    queryFn: () => SubCategoryService.getById(id!),
+    enabled: !!id,
+    staleTime: 0,
+  });

@@ -1,38 +1,41 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { useQueryCategory } from "@/modules/dashboard/hooks/useQueryCategory";
 import { useMutationDeleteCategory } from "@/modules/dashboard/hooks/useMutationCategory";
+import { useDeleteDialog } from "@/modules/dashboard/hooks/useDeleteDialog";
+import { slugify } from "@/shared/utils/slugify";
 
 export const useCategoryListModel = () => {
-  const { data, isLoading, isError } = useQueryCategory();
+  const { data, isLoading, isError, refetch } = useQueryCategory();
   const navigate = useNavigate();
   const { mutateAsync: deleteCategory } = useMutationDeleteCategory();
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
 
-  const handleDeleteRequest = (id: string) => setDeleteId(id);
-  const handleDeleteCancel = () => setDeleteId(null);
+  const deleteDialog = useDeleteDialog({
+    remove: (id) => deleteCategory(id),
+    successMessage: "Categoria excluída com sucesso!",
+    errorFallback: "Erro ao excluir categoria.",
+  });
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteId) return;
-    try {
-      await deleteCategory(deleteId);
-      toast.success("Categoria excluída com sucesso!");
-    } catch {
-      toast.error("Erro ao excluir categoria.");
-    } finally {
-      setDeleteId(null);
-    }
-  };
+  const categories = useMemo(() => {
+    const list = data ?? [];
+    const term = slugify(filter);
+    if (!term) return list;
+    return list.filter(
+      (c) => slugify(c.name).includes(term) || c.slug.includes(term)
+    );
+  }, [data, filter]);
 
   return {
-    data,
+    categories,
+    total: data?.length ?? 0,
+    filter,
+    setFilter,
     isLoading,
     isError,
-    deleteId,
-    handleDeleteRequest,
-    handleDeleteCancel,
-    handleDeleteConfirm,
-    navigate,
+    refetch: () => void refetch(),
+    ...deleteDialog,
+    goToCreate: () => navigate("/dashboard/categories/add"),
+    goToEdit: (id: number) => navigate(`/dashboard/categories/${id}`),
   };
 };

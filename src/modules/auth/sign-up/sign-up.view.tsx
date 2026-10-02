@@ -1,100 +1,78 @@
-import { Eye, Mail, User } from "lucide-react";
+import { AtSign, Mail } from "lucide-react";
 import { Input } from "@/shared/components/input";
 import { Button } from "@/shared/components/button";
 import { Link } from "react-router-dom";
 import { Label } from "@/shared/components/label";
 import { useSignUpModel } from "./sign-up.model";
+import { AuthHeading } from "../AuthHeading";
 
 type SignUpViewProps = ReturnType<typeof useSignUpModel>;
 
 export const SignUpView = (props: SignUpViewProps) => {
-  const { errors, handleSubmit, onSubmit, register } = props;
+  const { errors, handleSubmit, onSubmit, register, isSubmitting } = props;
   return (
-    <div className="w-full  p-4 sm:p-12.5 xl:p-17.5">
-      <p className="block mb-1 font-medium">Dashboard production review</p>
-      <h2 className="mb-2 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-        Sign up to your account
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          {...register("name")}
-          color="primary"
-          name="name"
-          id="name"
-          type="text"
-          placeholder="Entre com seu nome"
-          children={<Label value="Nome:" htmlFor="name" />}
-          error={errors.name?.message}
-        />
+    <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
+      <AuthHeading
+        title="Criar conta"
+        subtitle="Você receberá um e-mail para ativar a conta antes de entrar."
+      />
+      <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isSubmitting || undefined}>
+        <Input {...register("name")} id="name" autoComplete="name" placeholder="Seu nome completo" error={errors.name?.message}>
+          <Label value="Nome" htmlFor="name" required />
+        </Input>
         <Input
           {...register("username")}
-          color="primary"
-          name="username"
-          autoComplete="username"
           id="username"
-          type="text"
-          placeholder="Entre com seu username"
-          icon={<User size={24} />}
-          children={<Label value="Username:" htmlFor="username" />}
+          autoComplete="username"
+          placeholder="Como você quer ser identificado"
+          icon={<AtSign size={20} />}
           error={errors.username?.message}
-        />
+        >
+          <Label value="Usuário" htmlFor="username" required />
+        </Input>
         <Input
           {...register("email")}
-          color="primary"
-          name="email"
           id="email"
           type="email"
           autoComplete="email"
-          placeholder="Entre com seu email"
-          icon={<Mail size={24} />}
-          children={<Label value="Email:" htmlFor="email" />}
+          placeholder="voce@exemplo.com"
+          icon={<Mail size={20} />}
           error={errors.email?.message}
-        />
+        >
+          <Label value="E-mail" htmlFor="email" required />
+        </Input>
         <Input
           {...register("password")}
-          color="primary"
-          name="password"
           id="password"
-          autoComplete="current-password"
           type="password"
-          placeholder="6+ Characters, 1 Capital letter"
-          icon={<Eye size={24} />}
-          children={<Label value="Password:" htmlFor="password" />}
+          autoComplete="new-password"
+          placeholder="De 6 a 20 caracteres"
+          hint="Use de 6 a 20 caracteres."
           error={errors.password?.message}
-        />
+        >
+          <Label value="Senha" htmlFor="password" required />
+        </Input>
         <Input
           {...register("passwordConfirm")}
-          color="primary"
-          name="passwordConfirm"
           id="passwordConfirm"
           type="password"
           autoComplete="new-password"
-          placeholder="6+ Characters,"
-          icon={<Eye size={24} />}
-          children={
-            <Label value="Password Confirm:" htmlFor="passwordConfirm" />
-          }
+          placeholder="Repita a senha"
           error={errors.passwordConfirm?.message}
-        />
+        >
+          <Label value="Confirmar senha" htmlFor="passwordConfirm" required />
+        </Input>
 
-        <div className="mb-5">
-          <Button
-            type="submit"
-            value={"Sign In"}
-            color="default"
-            size="lg"
-            className="flex w-full p-4 text-white transition border rounded-lg cursor-pointer border-primary bg-primary hover:bg-opacity-90"
-          />
-        </div>
+        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting}>
+          {isSubmitting ? "Criando conta..." : "Criar conta"}
+        </Button>
 
-        <div className="mt-6 text-center">
-          <p>
-            Você ja tem conta ?{" "}
-            <Link to="/" className="text-primary">
-              Logar
-            </Link>
-          </p>
-        </div>
+        <p className="mt-6 text-center text-body dark:text-bodydark">
+          Já tem conta?{" "}
+          <Link to="/" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Entrar
+          </Link>
+        </p>
       </form>
     </div>
   );

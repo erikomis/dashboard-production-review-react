@@ -1,5 +1,4 @@
 import { Component, ReactNode } from "react";
-import { Link } from "react-router-dom";
 
 interface Props {
   children: ReactNode;
@@ -10,6 +9,10 @@ interface State {
   message: string;
 }
 
+/**
+ * Fica acima do BrowserRouter, então não pode usar <Link> (lançaria outro erro
+ * por estar fora do Router); usa <a> normal.
+ */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -27,25 +30,29 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <main className="grid min-h-full px-6 py-24 bg-white place-items-center sm:py-32 lg:px-8 dark:bg-boxdark">
-          <div className="text-center">
-            <p className="text-base font-semibold text-danger">Erro</p>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+        <main
+          role="alert"
+          className="grid min-h-screen place-items-center bg-whiten px-6 py-24 dark:bg-boxdark-2"
+        >
+          <div className="max-w-lg text-center">
+            <p className="text-base font-semibold text-danger dark:text-danger-light">Erro</p>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-black dark:text-white sm:text-4xl">
               Algo deu errado
             </h1>
-            <p className="mt-6 text-base leading-7 text-gray-600 dark:text-gray-400">
+            <p className="mt-6 text-base text-body dark:text-bodydark">
               {this.state.message || "Ocorreu um erro inesperado na aplicação."}
             </p>
-            <div className="flex items-center justify-center mt-10 gap-x-6">
-              <Link
-                to="/dashboard/products"
-                className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-opacity-90"
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <a
+                href="/dashboard/home"
+                className="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Voltar ao Dashboard
-              </Link>
+              </a>
               <button
+                type="button"
                 onClick={() => this.setState({ hasError: false, message: "" })}
-                className="text-sm font-semibold text-gray-900 dark:text-white"
+                className="rounded-md px-2 py-1 text-sm font-semibold text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-white"
               >
                 Tentar novamente →
               </button>

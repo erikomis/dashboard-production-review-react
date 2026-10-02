@@ -1,54 +1,84 @@
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ProductsService } from "@/modules/dashboard/services/products.service";
-import { CategoryService } from "@/modules/dashboard/services/category.service";
-import { SubCategoryService } from "@/modules/dashboard/services/sub-category.service";
-import { ReviewService } from "@/modules/dashboard/services/review.service";
-import { Review } from "@/shared/types/review";
+import { useSearchParams } from "react-router-dom";
+import { useQueryAdminStats } from "@/modules/dashboard/hooks/useQueryAdminStats";
+import { useQueryReviews } from "@/modules/dashboard/hooks/useQueryReviews";
+import {
+  chartTheme,
+  PERIOD_OPTIONS,
+  peakDay,
+  sumCounts,
+  toRatingBuckets,
+  weightedAverage,
+} from "@/modules/dashboard/utils/chart-data";
+import useColorMode from "@/shared/hooks/useColorMode";
+import { useMeQuery } from "@/shared/hooks/useMeQuery";
+import { homePeriodSchema } from "./home.schema";
+import { HomePeriod } from "./home.type";
+
+const RECENT_COUNT = 5;
 
 export const useHomeModel = () => {
-  const navigate = useNavigate();
+  const { data: user } = useMeQuery();
+  const [colorMode] = useColorMode();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const days = homePeriodSchema.parse(searchParams.get("days") ?? undefined) as HomePeriod;
 
-  const { data: productsData } = useQuery({
-    queryKey: ["products", 0, 1],
-    queryFn: () => ProductsService.fetchProducts(0, 1),
-  });
+  const setDays = (value: HomePeriod) =>
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === 30) next.delete("days");
+        else next.set("days", String(value));
+        return next;
+      },
+      { replace: true }
+    );
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => CategoryService.list(),
-  });
+  const stats = useQueryAdminStats(days);
+  const reviews = useQueryReviews(0, RECENT_COUNT);
 
-  const { data: subCategoriesData } = useQuery({
-    queryKey: ["sub-categories"],
-    queryFn: () => SubCategoryService.list(),
-  });
-
-  const { data: reviewsData } = useQuery({
-    queryKey: ["reviews", 0, 100],
-    queryFn: () => ReviewService.list(0, 100),
-  });
-
-  const totalProducts = productsData?.totalElements ?? "—";
-  const totalCategories = Array.isArray(categoriesData) ? categoriesData.length : "—";
-  const totalSubCategories = Array.isArray(subCategoriesData) ? subCategoriesData.length : "—";
-  const totalReviews = reviewsData?.totalElements ?? "—";
-
-  const reviews: Review[] = reviewsData?.content ?? [];
-  const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
-      : "—";
-
-  const recentReviews = reviews.slice(0, 5);
+  const data = stats.data;
+  const reviewsPerDay = data?.reviewsPerDay ?? [];
+  const usersPerDay = data?.usersPerDay ?? [];
+  const reviewsInPeriod = sumCounts(reviewsPerDay);
+  const usersInPeriod = sumCounts(usersPerDay);
 
   return {
-    totalProducts,
-    totalCategories,
-    totalSubCategories,
-    totalReviews,
-    avgRating,
-    recentReviews,
-    navigate,
+    userName: user?.name,
+    days,
+    setDays,
+    periodOptions: PERIOD_OPTIONS.map((value) => ({ value, label: `${value} dias` })),
+    theme: chartTheme(colorMode),
+    totals: data?.totals,
+    averageNote: data && data.totals.reviews > 0 ? data.averageNote : null,
+    ratingBuckets: toRatingBuckets(data?.ratingDistribution),
+    reviewsPerDay,
+    usersPerDay,
+    reviewsInPeriod,
+    usersInPeriod,
+    averageInPeriod: weightedAverage(reviewsPerDay),
+    reviewsPeak: peakDay(reviewsPerDay),
+    usersPeak: peakDay(usersPerDay),
+    topProducts: (data?.topProducts ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      value: p.totalReviews,
+      averageNote: p.averageNote,
+      to: `/dashboard/products/${p.id}`,
+    })),
+    topCategories: (data?.topCategories ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      value: c.totalReviews,
+      averageNote: c.averageNote,
+      to: `/dashboard/categories/${c.id}`,
+    })),
+    isLoadingStats: stats.isLoading,
+    isRefreshingStats: stats.isFetching && !stats.isLoading,
+    isStatsError: stats.isError,
+    refetchStats: () => void stats.refetch(),
+    recentReviews: reviews.data?.content ?? [],
+    isLoadingReviews: reviews.isLoading,
+    isReviewsError: reviews.isError,
+    refetchReviews: () => void reviews.refetch(),
   };
 };

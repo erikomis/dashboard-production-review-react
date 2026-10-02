@@ -1,42 +1,106 @@
 name: deployment
 on:
-  push:
-    branches: ["main"]
-    tags: ["v*.*.*"]
-  pull_request:
-    branches: ["main"]
+  # roda somente depois que os testes do push na main passarem
   workflow_run:
     workflows: ["testings"]
+    types: [completed]
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  # ghcr.io/erikomis/<repositório> (o GHCR exige minúsculas)
+  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
+  publish:
+    name: Publicar imagem no GHCR
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          # builda exatamente o commit que foi testado
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Definir tag da imagem
+        id: tag
+        run: echo "tag=sha-${HEAD_SHA::12}" >> "$GITHUB_OUTPUT"
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Conferir VITE_API_URL
+        if: ${{ vars.VITE_API_URL == '' }}
+        run: |
+          echo "::error::Crie a variável de repositório VITE_API_URL (ex.: https://api.seudominio.com/api/v1)"
+          exit 1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
+      - name: Login no GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and push frontend Docker image
-        uses: docker/build-push-action@v5
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # labels OCI (inclui org.opencontainers.image.source, que liga o pacote a este repositório)
+      - name: Metadados da imagem
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          context: "{{defaultContext}}"
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.tag.outputs.tag }}
+
+      - name: Build e push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
           push: true
-          tags:  ${{ secrets.DOCKER_USERNAME }}/${{secrets.PROJECT}}:latest, ${{ secrets.DOCKER_USERNAME }}/${{secrets.PROJECT}}:${{ github.run_number }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # o Vite embute a URL da API no bundle durante o build
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Deploy to vps
-        uses: appleboy/ssh-action@master
+
+  deploy:
+    name: Deploy na VPS
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # o token do job é usado só para a VPS puxar a imagem privada durante o deploy
+      packages: read
+    steps:
+      - name: Atualizar containers na VPS
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_TAG: ${{ needs.publish.outputs.tag }}
+          DEPLOY_DIR: ${{ vars.DEPLOY_DIR || 'dashboard-frontend' }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          envs: GHCR_USER,GHCR_TOKEN,IMAGE_TAG,DEPLOY_DIR
           script: |
-            cd dashboard-frontend
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            set -eu
+            cd "$DEPLOY_DIR"
+            if docker compose version >/dev/null 2>&1; then DC="docker compose"; else DC="docker-compose"; fi
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            # o token expira ao fim do job: nenhuma credencial fica salva na VPS
+            trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+            export IMAGE_TAG
+            $DC pull
+            $DC up -d --remove-orphans
+            docker image prune -f

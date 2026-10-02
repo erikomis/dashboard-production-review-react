@@ -18,10 +18,10 @@ const ResetPasswordView = lazy(
   () => import("./reset-password/ResetPasswordPage")
 );
 const RouterAuth = () => {
-  const { isSuccess } = useMeQuery();
+  const { data: user } = useMeQuery();
 
-  if (isSuccess) {
-    return <Navigate to="/dashboard/" />;
+  if (user) {
+    return <Navigate to="/dashboard/home" replace />;
   }
 
   return (

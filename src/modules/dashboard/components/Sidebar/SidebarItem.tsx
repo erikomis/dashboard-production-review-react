@@ -1,73 +1,47 @@
-import { Link, useLocation } from "react-router-dom";
-import SidebarDropdown from "./SidebarDropdown";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/shared/utils/utils";
+import { NavItem } from "./nav-items";
 
-
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SidebarItem = ({ item, pageName, setPageName }: any) => {
-  const handleClick = () => {
-    const updatedPageName =
-      pageName !== item.label.toLowerCase() ? item.label.toLowerCase() : "";
-    return setPageName(updatedPageName);
-  };
-
-  const pathname = useLocation().pathname;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isActive = (item: any) => {
-    if (item.route === pathname) return true;
-    if (item.children) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return item.children.some((child: any) => isActive(child));
-    }
-    return false;
-  };
-
-  const isItemActive = isActive(item);
-
-  return (
-    <>
-      <li>
-        <Link
-          to={item.route}
-          onClick={handleClick}
-          className={`${isItemActive ? "bg-graydark dark:bg-meta-4" : ""} group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4`}
-        >
-          {item.icon}
-          {item.label}
-          {item.children && (
-            <svg
-              className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
-                pageName === item.label.toLowerCase() && "rotate-180"
-              }`}
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M4.41107 6.9107C4.73651 6.58527 5.26414 6.58527 5.58958 6.9107L10.0003 11.3214L14.4111 6.91071C14.7365 6.58527 15.2641 6.58527 15.5896 6.91071C15.915 7.23614 15.915 7.76378 15.5896 8.08922L10.5896 13.0892C10.2641 13.4147 9.73651 13.4147 9.41107 13.0892L4.41107 8.08922C4.08563 7.76378 4.08563 7.23614 4.41107 6.9107Z"
-                fill=""
-              />
-            </svg>
-          )}
-        </Link>
-
-        {item.children && (
-          <div
-            className={`translate transform overflow-hidden ${
-              pageName !== item.label.toLowerCase() && "hidden"
-            }`}
-          >
-            <SidebarDropdown item={item.children} />
-          </div>
-        )}
-      </li>
-    </>
-  );
+type SidebarItemProps = {
+  item: NavItem;
+  collapsed: boolean;
+  onNavigate?: () => void;
 };
+
+/**
+ * Item de navegação. `NavLink` marca `aria-current="page"` e fica ativo também
+ * nas sub-rotas (ex.: /dashboard/products/add mantém "Produtos" ativo).
+ */
+const SidebarItem = ({ item, collapsed, onNavigate }: SidebarItemProps) => (
+  <li>
+    <NavLink
+      to={item.route}
+      onClick={onNavigate}
+      title={collapsed ? item.label : undefined}
+      className={({ isActive }) =>
+        cn(
+          "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-bodydark1 transition-colors hover:bg-graydark hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-light dark:hover:bg-meta-4",
+          collapsed && "lg:justify-center lg:px-0",
+          isActive && "bg-graydark text-white dark:bg-meta-4"
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-primary-light"
+            />
+          )}
+          <span aria-hidden="true" className="shrink-0">
+            {item.icon}
+          </span>
+          <span className={cn(collapsed && "lg:sr-only")}>{item.label}</span>
+        </>
+      )}
+    </NavLink>
+  </li>
+);
 
 export default SidebarItem;

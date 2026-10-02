@@ -1,77 +1,109 @@
-import { EyeOff } from "lucide-react";
-import React, { useState } from "react";
-import { tv } from "tailwind-variants";
+import { Eye, EyeOff } from "lucide-react";
+import React, { useId, useState } from "react";
 import { cn } from "../utils/utils";
-
-const InputStyle = tv({
-  base: "w-full py-4 pl-6 pr-10 text-black bg-transparent border rounded-lg outline-none border-stroke focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary",
-  variants: {
-    size: {
-      sm: "py-2 pl-4 pr-8",
-      md: "py-4 pl-6 pr-10",
-      lg: "py-6 pl-8 pr-12",
-    },
-    color: {
-      primary: "text-primary focus:border-primary dark:focus:border-primary",
-      secondary:
-        "text-secondary focus:border-secondary dark:focus:border-secondary",
-      danger: "text-danger focus:border-danger dark:focus:border-danger",
-      success: "text-success focus:border-success dark:focus:border-success",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-    color: "primary",
-  },
-});
+import { FieldError, FieldHint } from "./form/field-message";
+import { describedBy, fieldBaseClass, fieldBorderClass } from "./form/field-utils";
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   sizeType?: "sm" | "md" | "lg";
+  /** Mantido por compatibilidade; a cor de foco é sempre `primary`. */
   color?: "primary" | "secondary" | "danger" | "success";
+  /** Normalmente o `<Label />` do campo. */
   children?: React.ReactNode;
   icon?: React.ReactNode;
   error?: string;
+  hint?: React.ReactNode;
+  /** Conteúdo fixo à esquerda (ex.: "/" do slug). */
+  prefix?: string;
 }
 
+const sizes = {
+  sm: "py-2 text-sm",
+  md: "py-3",
+  lg: "py-4 text-lg",
+};
+
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ sizeType, color, type='text', children, ...props }, ref) => {
-    const [open, setOpen] = useState(false);
-    
+  (
+    {
+      sizeType = "md",
+      color: _color,
+      type = "text",
+      children,
+      icon,
+      error,
+      hint,
+      prefix,
+      className,
+      id: idProp,
+      ...props
+    },
+    ref
+  ) => {
+    void _color;
+    const generatedId = useId();
+    const id = idProp ?? generatedId;
+    const [showPassword, setShowPassword] = useState(false);
+    const isPassword = type === "password";
+    const hasTrailing = isPassword || !!icon;
+
     return (
-      <div className="mb-2">
+      <div className="mb-4">
         {children}
         <div className="relative">
-          <input
-            {...props}
-            className={cn(
-              InputStyle({ size: sizeType, color }),
-              props.className
-            )}
-            ref={ref}
-            type={type === "password" && open ? "text" : type}
-          />
-          {props.icon && type !== "password" && (
-            <span className="absolute right-4 top-4">{props.icon}</span>
-          )}
-
-          {type === "password" && (
+          {prefix && (
             <span
-              className="absolute cursor-pointer right-4 top-4"
-              onClick={() => setOpen(!open)}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-body dark:text-bodydark"
             >
-              {open ? <EyeOff size={24} /> : <>{props.icon}</>}
+              {prefix}
             </span>
           )}
+          <input
+            {...props}
+            id={id}
+            ref={ref}
+            type={isPassword && showPassword ? "text" : type}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy(id, hint, error)}
+            className={cn(
+              fieldBaseClass,
+              fieldBorderClass(!!error),
+              sizes[sizeType],
+              hasTrailing && "pr-12",
+              prefix && "pl-8",
+              className
+            )}
+          />
+          {icon && !isPassword && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-body dark:text-bodydark"
+            >
+              {icon}
+            </span>
+          )}
+          {isPassword && (
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              aria-pressed={showPassword}
+              aria-controls={id}
+              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-body hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:text-bodydark"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          )}
         </div>
-        {props.error && (
-          <span className="my-2 text-xs font-bold t text-danger">
-            {props.error}
-          </span>
-        )}
+        <FieldHint id={id}>{hint}</FieldHint>
+        <FieldError id={id} message={error} />
       </div>
     );
   }
 );
+
+Input.displayName = "Input";
 
 export { Input };

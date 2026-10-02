@@ -1,69 +1,54 @@
 import { Button } from "@/shared/components/button";
 import { Link } from "react-router-dom";
 import { useSignInModel } from "./sign-in.model";
-import { Eye, Mail } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { Input } from "@/shared/components/input";
 import { Label } from "@/shared/components/label";
+import { AuthHeading } from "../AuthHeading";
 
 type SignInViewProps = ReturnType<typeof useSignInModel>;
 export const SignInView = (props: SignInViewProps) => {
-  const { errors,  handleSubmit, onSubmit, register } = props;
+  const { errors, handleSubmit, onSubmit, register, isPending } = props;
 
   return (
-    <div className="w-full p-2 sm:p-12.5 xl:p-17.5">
-      <span className="mb-1.5 block font-medium">
-        Dashboard production review
-      </span>
-      <h2 className="text-2xl font-bold text-black mb-9 dark:text-white sm:text-title-xl2">
-        Sign in to your account
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
+      <AuthHeading title="Entrar no painel" subtitle="Acesso restrito a administradores." />
+      <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isPending || undefined}>
         <Input
           {...register("username")}
-          color="primary"
-          name="username"
-          id="email"
+          id="username"
           type="text"
           autoComplete="username"
-          placeholder="Entre com seu username"
-          icon={<Mail size={24} />}
-          children={<Label value="Username:" htmlFor="email" />}
+          placeholder="Seu usuário ou e-mail"
+          icon={<UserRound size={20} />}
           error={errors.username?.message}
-        />
+        >
+          <Label value="Usuário ou e-mail" htmlFor="username" required />
+        </Input>
         <Input
           {...register("password")}
-          color="primary"
-          name="password"
           id="password"
           type="password"
           autoComplete="current-password"
-          placeholder="Entre com sua senha"
-          icon={<Eye size={24} />}
-          children={<Label value="Password:" htmlFor="password" />}
+          placeholder="Sua senha"
           error={errors.password?.message}
-        />
-        <div className="flex justify-end mb-2">
-          <Link to="/forgot-password" className="text-primary">
+        >
+          <Label value="Senha" htmlFor="password" required />
+        </Input>
+        <div className="mb-6 flex justify-end">
+          <Link to="/forgot-password" className="rounded text-sm font-medium text-primary hover:underline dark:text-primary-light">
             Esqueceu a senha?
           </Link>
         </div>
-        <div className="mb-5">
-          <Button
-            type="submit"
-            value="Entrar"
-            color="default"
-            size="lg"
-            className="flex w-full p-4 text-white transition border rounded-lg cursor-pointer border-primary bg-primary hover:bg-opacity-90"
-          />
-        </div>
-        <div className="mt-6 text-center">
-          <p>
-            Você não tem conta ?{" "}
-            <Link to="/sign-up" className="text-primary">
-              Criar Conta
-            </Link>
-          </p>
-        </div>
+        <Button type="submit" size="lg" className="w-full" isLoading={isPending}>
+          {isPending ? "Entrando..." : "Entrar"}
+        </Button>
+        <p className="mt-6 text-center text-body dark:text-bodydark">
+          Não tem conta?{" "}
+          <Link to="/sign-up" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Criar conta
+          </Link>
+        </p>
       </form>
     </div>
   );

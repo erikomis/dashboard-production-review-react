@@ -5,8 +5,10 @@ export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   darkMode: "class",
   theme: {
+    // Mesmo par tipográfico do site: Inter no texto, Plus Jakarta Sans nos títulos.
     fontFamily: {
-      satoshi: ["sans-serif"],
+      satoshi: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      display: ['"Plus Jakarta Sans"', "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
     },
     screens: {
       "2xsm": "375px",
@@ -22,11 +24,12 @@ export default {
         black: "#1C2434",
         red: "#FB5454",
         "black-2": "#010101",
-        body: "#64748B",
+        body: "#5B6B82",
         bodydark: "#AEB7C0",
         bodydark1: "#DEE4EE",
         bodydark2: "#8A99AF",
         primary: "#3C50E0",
+        "primary-light": "#8B9BFF",
         secondary: "#80CAEE",
         stroke: "#E2E8F0",
         gray: "#EFF4FB",
@@ -51,8 +54,14 @@ export default {
         "meta-9": "#E5E7EB",
         "meta-10": "#0FADCF",
         success: "#219653",
+        "success-dark": "#1B7A43",
+        "success-light": "#5FD08F",
         danger: "#D34053",
+        "danger-light": "#FF8A98",
         warning: "#FFA70B",
+        // estrela das avaliações: mesma cor do site (3.2:1 sobre branco)
+        star: "#D97706",
+        "warning-dark": "#9A5B00",
       },
       fontSize: {
         "title-xxl": ["44px", "55px"],

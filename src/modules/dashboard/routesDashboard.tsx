@@ -16,15 +16,20 @@ const EditSubCategoryPage = lazy(() => import("./view/edit-sub-category/EditSubC
 const ReviewListPage = lazy(() => import("./view/review-list/ReviewListPage"));
 const CreateReviewPage = lazy(() => import("./view/create-review/CreateReviewPage"));
 const EditReviewPage = lazy(() => import("./view/edit-review/EditReviewPage"));
+const ImportCatalogPage = lazy(() => import("./view/import-catalog/ImportCatalogPage"));
+const UsersPage = lazy(() => import("./view/users/UsersPage"));
+const ActivityPage = lazy(() => import("./view/activity/ActivityPage"));
 const ProfilePage = lazy(() => import("./view/profile/ProfilePage"));
+const SettingsPage = lazy(() => import("./view/settings/SettingsPage"));
 
 const RouterDashboard = () => {
   return (
     <LayoutDashboard>
       <Suspense
         fallback={
-          <div className="flex items-center justify-center py-20">
-            <span className="text-gray-500">Carregando...</span>
+          <div role="status" className="flex items-center justify-center gap-3 py-20 text-body dark:text-bodydark">
+            <span aria-hidden="true" className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+            Carregando...
           </div>
         }
       >
@@ -38,6 +43,9 @@ const RouterDashboard = () => {
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/add" element={<CreateProductPage />} />
           <Route path="/products/:id" element={<EditProductPage />} />
+
+          {/* Importação de catálogo */}
+          <Route path="/import" element={<ImportCatalogPage />} />
 
           {/* Categorias */}
           <Route path="/categories" element={<CategoryListPage />} />
@@ -54,16 +62,16 @@ const RouterDashboard = () => {
           <Route path="/review/add" element={<CreateReviewPage />} />
           <Route path="/review/:id" element={<EditReviewPage />} />
 
+          {/* Moderação = aba "Ocultas" da tela de avaliações */}
+          <Route path="/moderation" element={<Navigate to="/dashboard/review?status=HIDDEN" replace />} />
+
+          {/* Comunidade e sistema */}
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/activity" element={<ActivityPage />} />
+
           {/* Perfil e Configurações */}
           <Route path="/profile" element={<ProfilePage />} />
-          <Route
-            path="/settings"
-            element={
-              <h1 className="text-2xl font-semibold text-black dark:text-white">
-                Configurações
-              </h1>
-            }
-          />
+          <Route path="/settings" element={<SettingsPage />} />
 
           {/* 404 dentro do dashboard */}
           <Route
@@ -71,7 +79,8 @@ const RouterDashboard = () => {
             element={
               <NotFoundView
                 path="/dashboard/home"
-                message="Voltar ao Dashboard"
+                message="Voltar à visão geral"
+                embedded
               />
             }
           />

@@ -4,46 +4,43 @@ import { Input } from "@/shared/components/input";
 import { Mail } from "lucide-react";
 import { Label } from "@/shared/components/label";
 import { useForgotPasswordModel } from "./forgot-password.model";
+import { AuthHeading } from "../AuthHeading";
+
 type ForgotPasswordProps = ReturnType<typeof useForgotPasswordModel>;
 export const ForgotPasswordView = (props: ForgotPasswordProps) => {
-  const { errors, handleSubmit, onSubmit, register } = props;
+  const { errors, handleSubmit, onSubmit, register, isSubmitting } = props;
 
   return (
-    <div className="w-full p-2 sm:p-12.5 xl:p-17.5">
-      <span className="mb-1.5 block font-medium">
-        Dashboard production review
-      </span>
-      <h2 className="text-2xl font-bold text-black mb-9 dark:text-white sm:text-title-xl2">
-        Esqueci minha senha
-      </h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
+      <AuthHeading
+        title="Esqueci minha senha"
+        subtitle="Informe o e-mail da conta. Enviaremos um código de 6 dígitos para redefinir a senha."
+      />
+      <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isSubmitting || undefined}>
         <Input
           {...register("email")}
-          color="primary"
-          name="email"
           id="email"
           type="email"
-          placeholder="Entre com seu email"
-          icon={<Mail size={24} />}
-          children={<Label value="Email:" htmlFor="email" />}
+          autoComplete="email"
+          placeholder="voce@exemplo.com"
+          icon={<Mail size={20} />}
           error={errors.email?.message}
-        />
-        <div className="mb-5">
-          <Button
-            type="submit"
-            value="Enviar email"
-            color="default"
-            size="lg"
-            className="flex w-full p-4 text-white transition border rounded-lg cursor-pointer border-primary bg-primary hover:bg-opacity-90"
-          />
-        </div>
-        <div className="mt-6 text-center">
-          <p>
-            <Link to="/" className="text-primary">
-              volta para login
-            </Link>
-          </p>
-        </div>
+        >
+          <Label value="E-mail" htmlFor="email" required />
+        </Input>
+        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting}>
+          {isSubmitting ? "Enviando..." : "Enviar código"}
+        </Button>
+        <p className="mt-6 text-center text-body dark:text-bodydark">
+          Já tem o código?{" "}
+          <Link to="/reset-password" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Redefinir senha
+          </Link>
+          {" · "}
+          <Link to="/" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Voltar ao login
+          </Link>
+        </p>
       </form>
     </div>
   );

@@ -4,42 +4,49 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useMutationSubCategory } from "@/modules/dashboard/hooks/useMutationSubCategory";
 import { useQueryCategory } from "@/modules/dashboard/hooks/useQueryCategory";
+import { useSlugField } from "@/modules/dashboard/hooks/useSlugField";
+import { getErrorMessage } from "@/shared/utils/error-message";
 import { SchemaCreateSubCategory } from "./create-sub-category.schema";
 import { CreateSubCategoryValues } from "./create-sub-category.type";
-import { Category } from "@/shared/types/category";
 
 export const useCreateSubCategoryModel = () => {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useMutationSubCategory();
-  const { data: categories } = useQueryCategory();
+  const categories = useQueryCategory();
 
+  const form = useForm<CreateSubCategoryValues>({
+    resolver: zodResolver(SchemaCreateSubCategory),
+    defaultValues: { name: "", slug: "", description: "" },
+  });
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CreateSubCategoryValues>({
-    resolver: zodResolver(SchemaCreateSubCategory),
-  });
+  } = form;
+  const { nameField, slugField, regenerateSlug } = useSlugField(form);
 
   const onSubmit: SubmitHandler<CreateSubCategoryValues> = async (data) => {
     try {
       await mutateAsync(data);
       toast.success("Subcategoria criada com sucesso!");
       navigate("/dashboard/sub-categories");
-    } catch {
-      toast.error("Erro ao criar subcategoria. Tente novamente.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Erro ao criar subcategoria. Tente novamente."));
     }
   };
 
-  const categoryOptions: Category[] = Array.isArray(categories) ? categories : [];
-
   return {
-    register,
-    handleSubmit,
+    nameField,
+    slugField,
+    descriptionField: register("description"),
+    categoryField: register("categorieId"),
+    regenerateSlug,
     errors,
     isPending,
-    onSubmit,
-    navigate,
-    categoryOptions,
+    categoryOptions: categories.data ?? [],
+    isLoadingCategories: categories.isLoading,
+    isCategoriesError: categories.isError,
+    onSubmit: handleSubmit(onSubmit),
+    onCancel: () => navigate("/dashboard/sub-categories"),
   };
 };
