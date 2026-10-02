@@ -134,17 +134,40 @@ npm run dev
 | `npm run lint` | ESLint em todo o projeto |
 | `npm test` | Testes unitários com Vitest (slug, mensagens de erro, schemas, eventos de auditoria, status, progresso da importação e dados dos gráficos) |
 
-### Docker
-
-```bash
-docker compose up --build   # build com Node + Nginx servindo em http://localhost:5173
-```
-
 ### Variáveis de ambiente
 
 | Variável | Exemplo | Descrição |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:8084/api/v1` | URL base da API, incluindo `/api/v1` |
+
+## 🐳 Docker e deploy
+
+As imagens são publicadas **privadas** no GitHub Container Registry: `ghcr.io/erikomis/dashboard-production-review-react`. A URL da API entra como `--build-arg VITE_API_URL`, porque o Vite embute o valor no bundle durante o build.
+
+```bash
+docker build --build-arg VITE_API_URL=http://localhost:8084/api/v1 -t dashboard-production-review-react .
+docker run -p 5173:5173 dashboard-production-review-react   # http://localhost:5173
+```
+
+```mermaid
+flowchart LR
+    T["testings<br/>lint + vitest + build<br/>push na main"] -->|sucesso| P["publish<br/>build do commit testado"]
+    P --> GHCR[("ghcr.io (privado)<br/>latest · sha-commit")]
+    GHCR --> D["deploy<br/>login temporário + pull + up"]
+    D --> VPS["VPS<br/>docker compose"]
+```
+
+- **publish**: só roda depois que os testes do push na `main` passam; builda exatamente o commit testado e publica as tags `latest` e `sha-<commit>`, autenticando com o `GITHUB_TOKEN` do próprio workflow.
+- **deploy**: entra na VPS por SSH, faz login no GHCR com o token temporário do job, sobe a imagem daquele commit e faz logout. **Nenhuma credencial fica salva na VPS.**
+
+| Tipo | Nome | Para quê |
+|---|---|---|
+| Secret | `HOST`, `USERNAME`, `SSH_KEY` | Acesso SSH à VPS |
+| Variável | `VITE_API_URL` | URL da API embutida no build (ex.: `https://api.seudominio.com/api/v1`). Sem ela, o publish falha com uma mensagem clara |
+| Variável (opcional) | `DEPLOY_DIR` | Pasta do `docker-compose.yml` na VPS (padrão: `dashboard-frontend`) |
+
+> [!IMPORTANT]
+> Antes do primeiro deploy, copie o `docker-compose.yml` deste repositório para a pasta da VPS. Depois do primeiro publish, confira em **Perfil → Packages → dashboard-production-review-react → Package settings** que a visibilidade está **Private**.
 
 ## 🏛 Arquitetura
 
