@@ -1,54 +1,56 @@
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { ProductsService } from "@/modules/dashboard/services/products.service";
-import { CategoryService } from "@/modules/dashboard/services/category.service";
-import { SubCategoryService } from "@/modules/dashboard/services/sub-category.service";
-import { ReviewService } from "@/modules/dashboard/services/review.service";
-import { Review } from "@/shared/types/review";
+import { useQueryProducts } from "@/modules/dashboard/hooks/useQueryProducts";
+import { useQueryCategory } from "@/modules/dashboard/hooks/useQueryCategory";
+import { useQuerySubCategory } from "@/modules/dashboard/hooks/useQuerySubCategory";
+import { useQueryReviews } from "@/modules/dashboard/hooks/useQueryReviews";
+import { useMeQuery } from "@/shared/hooks/useMeQuery";
+
+/** Quantas avaliações recentes usar para a média e a distribuição de notas. */
+const REVIEW_SAMPLE = 100;
+const RECENT_COUNT = 5;
 
 export const useHomeModel = () => {
-  const navigate = useNavigate();
+  const { data: user } = useMeQuery();
+  // size=1: só precisamos de page.totalElements
+  const products = useQueryProducts({ page: 0, size: 1 });
+  const categories = useQueryCategory();
+  const subCategories = useQuerySubCategory();
+  const reviews = useQueryReviews(0, REVIEW_SAMPLE);
 
-  const { data: productsData } = useQuery({
-    queryKey: ["products", 0, 1],
-    queryFn: () => ProductsService.fetchProducts(0, 1),
-  });
+  const totalProducts = products.data?.page.totalElements;
+  const totalReviews = reviews.data?.page.totalElements;
+  const totalCategories = categories.data?.length;
+  const totalSubCategories = subCategories.data?.length;
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => CategoryService.list(),
-  });
-
-  const { data: subCategoriesData } = useQuery({
-    queryKey: ["sub-categories"],
-    queryFn: () => SubCategoryService.list(),
-  });
-
-  const { data: reviewsData } = useQuery({
-    queryKey: ["reviews", 0, 100],
-    queryFn: () => ReviewService.list(0, 100),
-  });
-
-  const totalProducts = productsData?.totalElements ?? "—";
-  const totalCategories = Array.isArray(categoriesData) ? categoriesData.length : "—";
-  const totalSubCategories = Array.isArray(subCategoriesData) ? subCategoriesData.length : "—";
-  const totalReviews = reviewsData?.totalElements ?? "—";
-
-  const reviews: Review[] = reviewsData?.content ?? [];
+  const sample = reviews.data?.content ?? [];
+  const recentReviews = sample.slice(0, RECENT_COUNT);
   const avgRating =
-    reviews.length > 0
-      ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
-      : "—";
+    sample.length > 0 ? sample.reduce((acc, r) => acc + r.note, 0) / sample.length : null;
 
-  const recentReviews = reviews.slice(0, 5);
+  const distribution = [5, 4, 3, 2, 1].map((note) => {
+    const count = sample.filter((r) => r.note === note).length;
+    return { note, count, percent: sample.length ? Math.round((count / sample.length) * 100) : 0 };
+  });
+
+  const isSampleTruncated = (totalReviews ?? 0) > sample.length;
+
+  const refetchReviews = () => reviews.refetch();
 
   return {
+    userName: user?.name,
     totalProducts,
     totalCategories,
     totalSubCategories,
     totalReviews,
+    isLoadingProducts: products.isLoading,
+    isLoadingCategories: categories.isLoading,
+    isLoadingSubCategories: subCategories.isLoading,
+    isLoadingReviews: reviews.isLoading,
+    isReviewsError: reviews.isError,
+    refetchReviews,
     avgRating,
+    sampleSize: sample.length,
+    isSampleTruncated,
+    distribution,
     recentReviews,
-    navigate,
   };
 };

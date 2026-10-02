@@ -17,14 +17,16 @@ const ReviewListPage = lazy(() => import("./view/review-list/ReviewListPage"));
 const CreateReviewPage = lazy(() => import("./view/create-review/CreateReviewPage"));
 const EditReviewPage = lazy(() => import("./view/edit-review/EditReviewPage"));
 const ProfilePage = lazy(() => import("./view/profile/ProfilePage"));
+const SettingsPage = lazy(() => import("./view/settings/SettingsPage"));
 
 const RouterDashboard = () => {
   return (
     <LayoutDashboard>
       <Suspense
         fallback={
-          <div className="flex items-center justify-center py-20">
-            <span className="text-gray-500">Carregando...</span>
+          <div role="status" className="flex items-center justify-center gap-3 py-20 text-body dark:text-bodydark">
+            <span aria-hidden="true" className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+            Carregando...
           </div>
         }
       >
@@ -56,14 +58,7 @@ const RouterDashboard = () => {
 
           {/* Perfil e Configurações */}
           <Route path="/profile" element={<ProfilePage />} />
-          <Route
-            path="/settings"
-            element={
-              <h1 className="text-2xl font-semibold text-black dark:text-white">
-                Configurações
-              </h1>
-            }
-          />
+          <Route path="/settings" element={<SettingsPage />} />
 
           {/* 404 dentro do dashboard */}
           <Route
@@ -71,7 +66,8 @@ const RouterDashboard = () => {
             element={
               <NotFoundView
                 path="/dashboard/home"
-                message="Voltar ao Dashboard"
+                message="Voltar à visão geral"
+                embedded
               />
             }
           />

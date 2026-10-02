@@ -1,151 +1,220 @@
-import { Star, Package, Tag, Layers } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FolderTree, MessageSquareText, Package, Plus, Star, Tags } from "lucide-react";
+import { PageHeader } from "@/modules/dashboard/components/page-header/PageHeader";
+import { StatCard } from "@/modules/dashboard/components/stat-card/StatCard";
+import { Card } from "@/modules/dashboard/components/card/Card";
+import { EmptyState } from "@/shared/components/feedback/EmptyState";
+import { ErrorState } from "@/shared/components/feedback/ErrorState";
+import { Skeleton } from "@/shared/components/skeleton";
+import { StarRating } from "@/shared/components/star-rating";
+import { buttonVariants } from "@/shared/components/button-variants";
+import { formatDateTime, formatNumber, initials } from "@/shared/utils/format";
 import { useHomeModel } from "./home.model";
-import { Review } from "@/shared/types/review";
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  onClick?: () => void;
-}
-
-const StatCard = ({ title, value, icon, color, onClick }: StatCardProps) => (
-  <div
-    onClick={onClick}
-    className={`rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark ${onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""}`}
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <span className="text-sm font-medium text-bodydark2">{title}</span>
-        <h4 className="mt-2 text-3xl font-bold text-black dark:text-white">{value}</h4>
-      </div>
-      <div className={`flex h-11.5 w-11.5 items-center justify-center rounded-full ${color}`}>
-        {icon}
-      </div>
-    </div>
-  </div>
-);
 
 type HomeViewProps = ReturnType<typeof useHomeModel>;
 
 export const HomeView = ({
+  userName,
   totalProducts,
   totalCategories,
   totalSubCategories,
   totalReviews,
+  isLoadingProducts,
+  isLoadingCategories,
+  isLoadingSubCategories,
+  isLoadingReviews,
+  isReviewsError,
+  refetchReviews,
   avgRating,
+  sampleSize,
+  isSampleTruncated,
+  distribution,
   recentReviews,
-  navigate,
 }: HomeViewProps) => {
-  return (
-    <div className="flex flex-col gap-8">
-      <h2 className="text-2xl font-semibold text-black dark:text-white">Dashboard</h2>
+  const fmt = (value?: number) => (value === undefined ? undefined : formatNumber(value));
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  return (
+    <>
+      <PageHeader
+        title="Visão geral"
+        description={
+          userName
+            ? `Olá, ${userName.split(" ")[0]}! Acompanhe o catálogo e as avaliações mais recentes.`
+            : "Acompanhe o catálogo e as avaliações mais recentes."
+        }
+        actions={
+          <Link to="/dashboard/products/add" className={buttonVariants()}>
+            <Plus size={18} aria-hidden="true" />
+            Novo produto
+          </Link>
+        }
+      />
+
+      <section aria-label="Totais" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:gap-6">
         <StatCard
-          title="Total de Produtos"
-          value={totalProducts}
-          icon={<Package size={22} className="text-white" />}
-          color="bg-primary"
-          onClick={() => navigate("/dashboard/products")}
+          title="Produtos"
+          value={fmt(totalProducts)}
+          isLoading={isLoadingProducts}
+          icon={<Package size={22} />}
+          to="/dashboard/products"
+          linkLabel="Ver produtos"
         />
         <StatCard
           title="Categorias"
-          value={totalCategories}
-          icon={<Tag size={22} className="text-white" />}
-          color="bg-meta-3"
-          onClick={() => navigate("/dashboard/categories")}
+          value={fmt(totalCategories)}
+          isLoading={isLoadingCategories}
+          icon={<Tags size={22} />}
+          iconClassName="bg-meta-3/10 text-success-dark dark:bg-meta-3/20 dark:text-success-light"
+          to="/dashboard/categories"
+          linkLabel="Ver categorias"
         />
         <StatCard
-          title="Sub-categorias"
-          value={totalSubCategories}
-          icon={<Layers size={22} className="text-white" />}
-          color="bg-meta-6"
-          onClick={() => navigate("/dashboard/sub-categories")}
+          title="Subcategorias"
+          value={fmt(totalSubCategories)}
+          isLoading={isLoadingSubCategories}
+          icon={<FolderTree size={22} />}
+          iconClassName="bg-meta-5/10 text-meta-5 dark:bg-meta-5/20"
+          to="/dashboard/sub-categories"
+          linkLabel="Ver subcategorias"
         />
         <StatCard
-          title="Total de Avaliações"
-          value={totalReviews}
-          icon={<Star size={22} className="text-white" />}
-          color="bg-warning"
-          onClick={() => navigate("/dashboard/review")}
+          title="Avaliações"
+          value={fmt(totalReviews)}
+          isLoading={isLoadingReviews}
+          icon={<MessageSquareText size={22} />}
+          iconClassName="bg-warning/15 text-warning-dark dark:bg-warning/20 dark:text-warning"
+          to="/dashboard/review"
+          linkLabel="Ver avaliações"
         />
-      </div>
+      </section>
 
-      {/* Nota média */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-sm border border-stroke bg-white py-6 px-7.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:col-span-1">
-          <p className="text-sm font-medium text-bodydark2">Nota Média</p>
-          <div className="mt-2 flex items-center gap-2">
-            <span className="text-4xl font-bold text-black dark:text-white">{avgRating}</span>
-            <div className="flex items-center gap-0.5">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <Card
+          title="Nota média"
+          titleId="avg-title"
+          description={
+            sampleSize > 0
+              ? isSampleTruncated
+                ? `Com base nas ${sampleSize} avaliações mais recentes`
+                : `Com base em ${sampleSize} ${sampleSize === 1 ? "avaliação" : "avaliações"}`
+              : undefined
+          }
+        >
+          {isLoadingReviews ? (
+            <div className="space-y-3" aria-hidden="true">
+              <Skeleton className="h-10 w-24" />
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  size={18}
-                  className={
-                    i < Math.round(Number(avgRating))
-                      ? "text-warning fill-warning"
-                      : "text-gray-300 fill-gray-300"
-                  }
-                />
+                <Skeleton key={i} className="h-3 w-full" />
               ))}
             </div>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            baseado em {typeof totalReviews === "number" ? totalReviews : 0} avaliações
-          </p>
-        </div>
-      </div>
-
-      {/* Avaliações recentes */}
-      <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-4 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-black dark:text-white">
-            Avaliações Recentes
-          </h3>
-          <button
-            onClick={() => navigate("/dashboard/review")}
-            className="text-sm text-primary hover:underline"
-          >
-            Ver todas →
-          </button>
-        </div>
-
-        {recentReviews.length === 0 ? (
-          <p className="py-6 text-center text-sm text-gray-500">Nenhuma avaliação ainda.</p>
-        ) : (
-          <div className="flex flex-col divide-y divide-stroke dark:divide-strokedark">
-            {recentReviews.map((review: Review) => (
-              <div key={review.id} className="flex items-start justify-between gap-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-black dark:text-white truncate">
-                    {review.title}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
-                    {review.product?.name ?? "Produto"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-0.5 flex-shrink-0">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={13}
-                      className={
-                        i < review.rating
-                          ? "text-warning fill-warning"
-                          : "text-gray-300 fill-gray-300"
-                      }
-                    />
-                  ))}
-                </div>
+          ) : avgRating === null ? (
+            <p className="py-6 text-center text-sm text-body dark:text-bodydark">
+              Ainda não há avaliações para calcular a média.
+            </p>
+          ) : (
+            <>
+              <div className="flex items-end gap-3">
+                <span className="text-title-xl font-bold leading-none text-black dark:text-white">
+                  {avgRating.toFixed(1).replace(".", ",")}
+                </span>
+                <StarRating value={avgRating} size={20} className="mb-1" />
               </div>
-            ))}
-          </div>
-        )}
+              <ul className="mt-6 space-y-2.5" aria-label="Distribuição das notas">
+                {distribution.map(({ note, count, percent }) => (
+                  <li key={note} className="flex items-center gap-3 text-sm">
+                    <span className="flex w-8 shrink-0 items-center gap-1 text-black dark:text-white">
+                      {note}
+                      <Star size={12} aria-hidden="true" className="fill-warning text-warning" />
+                    </span>
+                    <span
+                      className="h-2 flex-1 overflow-hidden rounded-full bg-stroke dark:bg-meta-4"
+                      aria-hidden="true"
+                    >
+                      <span className="block h-full rounded-full bg-warning" style={{ width: `${percent}%` }} />
+                    </span>
+                    <span className="w-16 shrink-0 text-right text-body dark:text-bodydark">
+                      {count} <span className="sr-only">avaliações com nota {note}, </span>({percent}%)
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </Card>
+
+        <Card
+          className="xl:col-span-2"
+          title="Avaliações recentes"
+          titleId="recent-title"
+          description="As últimas avaliações publicadas no site"
+          bodyClassName="p-0"
+          actions={
+            <Link
+              to="/dashboard/review"
+              className="rounded text-sm font-medium text-primary hover:underline dark:text-primary-light"
+            >
+              Ver todas <span className="sr-only">as avaliações</span>→
+            </Link>
+          }
+        >
+          {isLoadingReviews ? (
+            <ul aria-hidden="true">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <li key={i} className="flex gap-4 border-b border-stroke px-6 py-4 last:border-0 dark:border-strokedark">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-3 w-2/3" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : isReviewsError ? (
+            <ErrorState title="Não foi possível carregar as avaliações" onRetry={refetchReviews} />
+          ) : recentReviews.length === 0 ? (
+            <EmptyState
+              icon={<MessageSquareText size={30} aria-hidden="true" />}
+              title="Nenhuma avaliação ainda"
+              description="Quando os clientes avaliarem produtos, elas aparecerão aqui."
+            />
+          ) : (
+            <ul>
+              {recentReviews.map((review) => (
+                <li
+                  key={review.id}
+                  className="flex gap-4 border-b border-stroke px-5 py-4 last:border-0 dark:border-strokedark sm:px-6"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/20 dark:text-primary-light"
+                  >
+                    {initials(review.userName)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                      <p className="font-medium text-black dark:text-white">{review.title}</p>
+                      <StarRating value={review.note} size={14} />
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-sm text-body dark:text-bodydark">
+                      {review.description}
+                    </p>
+                    <p className="mt-1 text-xs text-body dark:text-bodydark">
+                      <span className="font-medium text-black dark:text-bodydark1">
+                        {review.userName ?? "Usuário"}
+                      </span>{" "}
+                      em{" "}
+                      <span className="font-medium text-black dark:text-bodydark1">
+                        {review.productName ?? `Produto #${review.productId}`}
+                      </span>{" "}
+                      · <time dateTime={review.createdAt}>{formatDateTime(review.createdAt)}</time>
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </div>
-    </div>
+    </>
   );
 };
