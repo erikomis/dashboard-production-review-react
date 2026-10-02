@@ -16,6 +16,9 @@ const EditSubCategoryPage = lazy(() => import("./view/edit-sub-category/EditSubC
 const ReviewListPage = lazy(() => import("./view/review-list/ReviewListPage"));
 const CreateReviewPage = lazy(() => import("./view/create-review/CreateReviewPage"));
 const EditReviewPage = lazy(() => import("./view/edit-review/EditReviewPage"));
+const ImportCatalogPage = lazy(() => import("./view/import-catalog/ImportCatalogPage"));
+const UsersPage = lazy(() => import("./view/users/UsersPage"));
+const ActivityPage = lazy(() => import("./view/activity/ActivityPage"));
 const ProfilePage = lazy(() => import("./view/profile/ProfilePage"));
 const SettingsPage = lazy(() => import("./view/settings/SettingsPage"));
 
@@ -41,6 +44,9 @@ const RouterDashboard = () => {
           <Route path="/products/add" element={<CreateProductPage />} />
           <Route path="/products/:id" element={<EditProductPage />} />
 
+          {/* Importação de catálogo */}
+          <Route path="/import" element={<ImportCatalogPage />} />
+
           {/* Categorias */}
           <Route path="/categories" element={<CategoryListPage />} />
           <Route path="/categories/add" element={<CreateCategoryPage />} />
@@ -55,6 +61,13 @@ const RouterDashboard = () => {
           <Route path="/review" element={<ReviewListPage />} />
           <Route path="/review/add" element={<CreateReviewPage />} />
           <Route path="/review/:id" element={<EditReviewPage />} />
+
+          {/* Moderação = aba "Ocultas" da tela de avaliações */}
+          <Route path="/moderation" element={<Navigate to="/dashboard/review?status=HIDDEN" replace />} />
+
+          {/* Comunidade e sistema */}
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/activity" element={<ActivityPage />} />
 
           {/* Perfil e Configurações */}
           <Route path="/profile" element={<ProfilePage />} />
