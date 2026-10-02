@@ -1,18 +1,20 @@
 import { Search, X } from "lucide-react";
 import { useId } from "react";
+import { cn } from "@/shared/utils/utils";
 
 type SearchInputProps = {
   value: string;
   onChange: (value: string) => void;
   label: string;
   placeholder?: string;
+  className?: string;
 };
 
 /** Campo de busca/filtro com label acessível (visualmente oculto) e botão limpar. */
-export const SearchInput = ({ value, onChange, label, placeholder }: SearchInputProps) => {
+export const SearchInput = ({ value, onChange, label, placeholder, className }: SearchInputProps) => {
   const id = useId();
   return (
-    <div className="relative w-full sm:max-w-xs">
+    <div className={cn("relative w-full sm:max-w-xs", className)}>
       <label htmlFor={id} className="sr-only">
         {label}
       </label>

@@ -10,7 +10,7 @@ type StarRatingProps = { value: number; size?: number; className?: string };
 export const StarRating = ({ value, size = 16, className }: StarRatingProps) => (
   <span
     role="img"
-    aria-label={`Nota ${value} de 5`}
+    aria-label={`Nota ${String(value).replace(".", ",")} de 5`}
     className={cn("inline-flex items-center gap-0.5", className)}
   >
     {Array.from({ length: 5 }).map((_, i) => (

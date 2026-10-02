@@ -20,12 +20,14 @@ export interface IconButtonProps
   /** Obrigatório: nome acessível e texto do tooltip. */
   label: string;
   color?: "default" | "danger";
+  /** Alinhamento do tooltip: `end` encosta à direita (útil na última coluna de tabelas). */
+  tooltipAlign?: "center" | "end";
   children: React.ReactNode;
 }
 
 /** Botão só com ícone: tem `aria-label` e tooltip visível no hover e no foco. */
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ label, color, className, children, type = "button", ...props }, ref) => (
+  ({ label, color, className, children, tooltipAlign = "center", type = "button", ...props }, ref) => (
     <button
       ref={ref}
       type={type}
@@ -36,9 +38,14 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       <span aria-hidden="true">{children}</span>
       <span
         role="presentation"
-        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs font-medium text-white opacity-0 shadow transition-opacity group-hover/icon:opacity-100 group-focus-visible/icon:opacity-100 dark:bg-meta-4"
+        className={cn(
+          "pointer-events-none absolute bottom-full z-50 mb-1.5 whitespace-nowrap",
+          tooltipAlign === "end" ? "right-0" : "left-1/2 -translate-x-1/2"
+        )}
       >
-        {label}
+        <span className="block rounded bg-black px-2 py-1 text-xs font-medium text-white opacity-0 shadow transition-opacity group-hover/icon:opacity-100 group-focus-visible/icon:opacity-100 dark:bg-meta-4">
+          {label}
+        </span>
       </span>
     </button>
   )
