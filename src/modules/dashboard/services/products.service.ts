@@ -4,6 +4,7 @@ import {
   ProductImage,
   ProductPage,
   ProductPayload,
+  ProductSortProperty,
 } from "@/shared/types/product";
 
 type Id = number | string;
@@ -12,13 +13,26 @@ export type ProductListParams = {
   page?: number;
   size?: number;
   search?: string;
-  property?: string;
+  categoryId?: number;
+  subCategorieId?: number;
+  /** Só produtos com pelo menos uma avaliação visível (ranking). */
+  onlyRated?: boolean;
+  property?: ProductSortProperty;
   sort?: "ASC" | "DESC";
 };
 
 export const ProductsService = {
   /** GET /production/list — paginado (0-based); totais em `page.*`. */
-  fetchProducts: async ({ page = 0, size = 10, search, property, sort }: ProductListParams = {}) => {
+  fetchProducts: async ({
+    page = 0,
+    size = 10,
+    search,
+    categoryId,
+    subCategorieId,
+    onlyRated,
+    property,
+    sort,
+  }: ProductListParams = {}) => {
     const response = await api.request<ProductPage>({
       method: "GET",
       url: "/production/list",
@@ -26,6 +40,9 @@ export const ProductsService = {
         page,
         size,
         search: search?.trim() || undefined,
+        categoryId: categoryId || undefined,
+        subCategorieId: subCategorieId || undefined,
+        onlyRated: onlyRated || undefined,
         property,
         sort,
       },
@@ -82,6 +99,7 @@ export const ProductsService = {
     return response.data;
   },
 
+  /** Imagens externas (`external:`) só saem do banco; as demais também do MinIO. */
   deleteImage: async (imageId: Id) => {
     await api.request({
       method: "DELETE",

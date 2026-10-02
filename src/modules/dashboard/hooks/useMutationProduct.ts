@@ -31,3 +31,10 @@ export const useMutationUploadProductImage = () =>
       ProductsService.uploadImage(productId, file),
     onSuccess: invalidate,
   });
+
+/** DELETE /production/file/{id} — invalida o detalhe e a listagem (miniatura). */
+export const useMutationDeleteProductImage = () =>
+  useMutation({
+    mutationFn: (imageId: number) => ProductsService.deleteImage(imageId),
+    onSuccess: invalidate,
+  });
