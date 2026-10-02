@@ -4,7 +4,8 @@ import { ResetPassword } from "./reset-password.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SchemaResetPassword } from "./reset-password.schema";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getErrorMessage } from "@/shared/utils/error-message";
 import { toast } from "react-toastify";
 
 type ResetPasswordService = typeof ResetPasswordService;
@@ -12,27 +13,25 @@ type ResetPasswordService = typeof ResetPasswordService;
 export const useResetPasswordModel = (service: ResetPasswordService) => {
   const [errosResponse, setErrorsResponse] = useState<string>("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<ResetPassword>({
     resolver: zodResolver(SchemaResetPassword),
+    defaultValues: { email: searchParams.get("email") ?? "" },
   });
 
   const onSubmit = async ({ email, password, recoveryCode }: ResetPassword) => {
+    setErrorsResponse("");
     try {
-      const response = await service(email, password, recoveryCode);
-
-      if (response.status !== 204) {
-        setErrorsResponse(response.data.message);
-      }
-      toast.success("Senha alterada com sucesso.");
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
+      await service(email, password, recoveryCode);
+      toast.success("Senha alterada! Entre com a nova senha.");
+      navigate("/", { replace: true });
     } catch (er) {
-      setErrorsResponse((er as Error).message);
+      // 400 código inválido
+      setErrorsResponse(getErrorMessage(er, "Não foi possível alterar a senha."));
     }
   };
   return {
@@ -41,5 +40,6 @@ export const useResetPasswordModel = (service: ResetPasswordService) => {
     errors,
     handleSubmit,
     onSubmit,
+    isSubmitting,
   };
 };

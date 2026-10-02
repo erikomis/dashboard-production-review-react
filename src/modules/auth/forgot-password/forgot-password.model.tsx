@@ -5,7 +5,7 @@ import { SchemaForgotPassword } from "./forgot-password.schema";
 import { toast } from "react-toastify";
 import { ForgotPassword } from "./forgot-password.type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
+import { getErrorMessage } from "@/shared/utils/error-message";
 
 type ForgotPasswordServiceProps = typeof ForgotPasswordService;
 
@@ -14,7 +14,7 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ForgotPassword>({
     resolver: zodResolver(SchemaForgotPassword),
   });
@@ -22,15 +22,11 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
   const onSubmit = async (data: ForgotPassword) => {
     try {
       await service(data.email);
-      toast.success("Email enviado com sucesso.");
-      setTimeout(() => {
-        navigate("/reset-password");
-      }, 3000);
+      toast.success("Enviamos um código de 6 dígitos para o seu e-mail.");
+      navigate(`/reset-password?email=${encodeURIComponent(data.email)}`);
     } catch (er) {
-      const message =
-        (er as AxiosError<{ message: string }>)?.response?.data?.message ||
-        (er as Error).message;
-      toast.error(message);
+      // 404 e-mail não cadastrado
+      toast.error(getErrorMessage(er, "Não foi possível enviar o código."));
     }
   };
 
@@ -39,5 +35,6 @@ export const useForgotPasswordModel = (service: ForgotPasswordServiceProps) => {
     register,
     errors,
     onSubmit,
+    isSubmitting,
   };
 };

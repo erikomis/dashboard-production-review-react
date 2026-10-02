@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { SchemaSignUp } from "./sign-up.schema";
 import { useNavigate } from "react-router-dom";
-import { AxiosError } from "axios";
+import { getErrorMessage } from "@/shared/utils/error-message";
 import { toast } from "react-toastify";
 
 type SignUpServiceProps = typeof SignUpService;
@@ -14,7 +14,7 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<SignUp>({
     resolver: zodResolver(SchemaSignUp),
   });
@@ -29,12 +29,12 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
       );
 
       if (response.status === 201) {
-        toast.success("User criado com sucesso!, ira redirecionar para a pagina de login e foi enviado um email de confirmação");
+        toast.success("Conta criada! Enviamos um e-mail para você ativar a conta antes de entrar.");
         navigate("/");
       }
     } catch (er) {
-      const error = er as AxiosError<{ message: string }>;
-      toast.error(error.message);
+      // 409 usuário/e-mail já existe
+      toast.error(getErrorMessage(er, "Não foi possível criar a conta."));
     }
   };
 
@@ -43,5 +43,6 @@ export const useSignUpModel = (SignUpService: SignUpServiceProps) => {
     handleSubmit,
     register,
     errors,
+    isSubmitting,
   };
 };

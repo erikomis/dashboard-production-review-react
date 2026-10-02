@@ -1,95 +1,92 @@
 import { Link } from "react-router-dom";
+import { CircleAlert, KeyRound, Mail } from "lucide-react";
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
 import { Label } from "@/shared/components/label";
 import { useResetPasswordModel } from "./reset-password.model";
-import { Eye, Mail } from "lucide-react";
+import { AuthHeading } from "../AuthHeading";
 
 type ResetPasswordProps = ReturnType<typeof useResetPasswordModel>;
 
 export const ResetPasswordView = (props: ResetPasswordProps) => {
-  const { errors, handleSubmit, onSubmit, register ,errosResponse} = props;
+  const { errors, handleSubmit, onSubmit, register, errosResponse, isSubmitting } = props;
   return (
-    <div className="w-full  p-4 sm:p-12.5 xl:p-17.5">
-      <p className="block mb-1 font-medium">Dashboard production review</p>
-      <h2 className="mb-2 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-        Sign up to your account
-      </h2>
+    <div className="w-full p-6 sm:p-12.5 xl:p-17.5">
+      <AuthHeading
+        title="Redefinir senha"
+        subtitle="Digite o código de 6 dígitos que enviamos para o seu e-mail e escolha uma nova senha."
+      />
 
-      {errosResponse && (
-        <div className="p-2 mb-1 rounded bg-danger">
-          <span className="text-slate-200"> {errosResponse}</span>
-        </div>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <div aria-live="assertive">
+        {errosResponse && (
+          <div
+            role="alert"
+            className="mb-5 flex items-start gap-2 rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger dark:text-danger-light"
+          >
+            <CircleAlert size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+            {errosResponse}
+          </div>
+        )}
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate aria-busy={isSubmitting || undefined}>
         <Input
           {...register("email")}
-          color="primary"
-          name="email"
-          autoComplete="email"
           id="email"
           type="email"
-          placeholder="Entre com seu email"
-          icon={<Mail size={24} />}
-          children={<Label value="Email:" htmlFor="email" />}
+          autoComplete="email"
+          placeholder="voce@exemplo.com"
+          icon={<Mail size={20} />}
           error={errors.email?.message}
-        />
+        >
+          <Label value="E-mail" htmlFor="email" required />
+        </Input>
         <Input
           {...register("recoveryCode")}
-          color="primary"
-          name="recoveryCode"
           id="recoveryCode"
-          type="text"
-          autoComplete="recoveryCode"
-          placeholder="Entre com seu código de recuperação"
-          icon={<Mail size={24} />}
-          children={<Label value="Codigo de verificação:" htmlFor="Codigo de recuperação" />}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          placeholder="000000"
+          icon={<KeyRound size={20} />}
+          className="font-mono tracking-[0.3em]"
           error={errors.recoveryCode?.message}
-        />
+        >
+          <Label value="Código de verificação" htmlFor="recoveryCode" required />
+        </Input>
         <Input
           {...register("password")}
-          color="primary"
-          name="password"
           id="password"
-          autoComplete="current-password"
           type="password"
-          placeholder="6+ Characters, 1 Capital letter"
-          icon={<Eye size={24} />}
-          children={<Label value="Password:" htmlFor="password" />}
+          autoComplete="new-password"
+          placeholder="De 6 a 20 caracteres"
           error={errors.password?.message}
-        />
+        >
+          <Label value="Nova senha" htmlFor="password" required />
+        </Input>
         <Input
           {...register("passwordConfirm")}
-          color="primary"
-          name="passwordConfirm"
           id="passwordConfirm"
           type="password"
           autoComplete="new-password"
-          placeholder="6+ Characters,"
-          icon={<Eye size={24} />}
-          children={
-            <Label value="Password Confirm:" htmlFor="passwordConfirm" />
-          }
+          placeholder="Repita a nova senha"
           error={errors.passwordConfirm?.message}
-        />
+        >
+          <Label value="Confirmar nova senha" htmlFor="passwordConfirm" required />
+        </Input>
 
-        <div className="mb-5">
-          <Button
-            type="submit"
-            value={"Sign In"}
-            color="default"
-            size="lg"
-            className="flex w-full p-4 text-white transition border rounded-lg cursor-pointer border-primary bg-primary hover:bg-opacity-90"
-          />
-        </div>
+        <Button type="submit" size="lg" className="mt-2 w-full" isLoading={isSubmitting}>
+          {isSubmitting ? "Salvando..." : "Redefinir senha"}
+        </Button>
 
-        <div className="mt-6 text-center">
-          <p>
-            <Link to="/" className="text-primary">
-              Logar
-            </Link>
-          </p>
-        </div>
+        <p className="mt-6 text-center text-body dark:text-bodydark">
+          <Link to="/forgot-password" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Reenviar código
+          </Link>
+          {" · "}
+          <Link to="/" className="rounded font-medium text-primary hover:underline dark:text-primary-light">
+            Voltar ao login
+          </Link>
+        </p>
       </form>
     </div>
   );

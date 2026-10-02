@@ -1,52 +1,42 @@
-import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { ActivateAccountService } from "../services/activateAccount";
-import { useNavigate, useParams } from "react-router-dom";
 
 type ActivateAccountServiceProps = typeof ActivateAccountService;
 
-export const useActivateAccountModel = (
-  service: ActivateAccountServiceProps
-) => {
-  const navigate = useNavigate();
+/**
+ * GET /auth/activate/{token}. Usa React Query para deduplicar a chamada: com
+ * useEffect, o StrictMode chamava duas vezes e a 2ª (token já usado) dava 404,
+ * mostrando erro mesmo com a conta ativada.
+ */
+export const useActivateAccountModel = (service: ActivateAccountServiceProps) => {
   const { token } = useParams();
 
-  const [message, setMessage] = useState("");
-  const [type, setType] = useState("success");
+  const { isPending, isSuccess, error } = useQuery({
+    queryKey: ["activate-account", token],
+    queryFn: () => service(token!),
+    enabled: !!token,
+    retry: false,
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
 
-  useEffect(() => {
-    const activateAccount = async () => {
-      if (!token) {
-        setMessage("Token invalido.");
-        setType("error");
-        return;
-      }
-      try {
-        const response = await service(token);
-        if (response.status !== 200) {
-          setMessage("Erro ao ativar a conta. Por favor, tente novamente.");
-          setType("error");
-          setTimeout(() => {
-            navigate("/");
-          }, 3000);
-          return;
-        }
-        setMessage("Conta ativada com sucesso.");
-        setTimeout(() => {
-          navigate("/");
-        }, 3000);
-      } catch {
-        setMessage("Erro ao ativar a conta. Por favor, tente novamente.");
-        setType("error");
-        setTimeout(() => {
-          navigate("/");
-        }, 6000);
-      }
-    };
-    activateAccount();
-  }, [token, navigate, service]);
+  const status: "loading" | "success" | "error" = !token
+    ? "error"
+    : isPending
+      ? "loading"
+      : isSuccess
+        ? "success"
+        : "error";
 
-  return {
-    message,
-    type,
-  };
+  const message =
+    status === "success"
+      ? "Conta ativada com sucesso! Você já pode entrar."
+      : status === "error"
+        ? !token
+          ? "Link de ativação inválido."
+          : `${error?.message || "Não foi possível ativar a conta."} O link pode ter expirado ou já ter sido usado.`
+        : "Ativando sua conta...";
+
+  return { status, message };
 };

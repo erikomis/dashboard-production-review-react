@@ -4,22 +4,22 @@ export const SchemaSignUp = z
   .object({
     name: z
       .string()
-      .min(3, { message: "Nome precisa ter no minimo 3 caracteres" }),
-    email: z.string().email({ message: "Email invalido" }),
+      .min(3, { message: "O nome precisa ter no mínimo 3 caracteres" }),
+    email: z.string().email({ message: "Informe um e-mail válido" }),
     username: z
       .string()
-      .min(3, { message: "Username precisa ter no minimo 3 caracteres" })
+      .min(3, { message: "O usuário precisa ter no mínimo 3 caracteres" })
       .refine((data) => !data.includes("@"), {
-        message: "Username invalido",
+        message: "O usuário não pode conter @",
       }),
+    // API aceita de 3 a 20 caracteres; exigimos 6 no mínimo por segurança
     password: z
       .string()
-      .min(6, { message: "Password precisa ter no minimo 6 caracteres" }),
-    passwordConfirm: z
-      .string()
-      .min(6, { message: "Password precisa ter no minimo 6 caracteres" }),
+      .min(6, { message: "A senha precisa ter no mínimo 6 caracteres" })
+      .max(20, { message: "A senha pode ter no máximo 20 caracteres" }),
+    passwordConfirm: z.string().min(1, { message: "Confirme a senha" }),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "Password e Password Confirm devem ser iguais",
+    message: "As senhas não conferem",
     path: ["passwordConfirm"],
   });
